@@ -18,14 +18,14 @@ def createMenu():
         cmds.menu("DojoTools", label = "DojoTools", to = True, p = "MayaWindows")
         
         # Create a menu item for the RDojo UI
-        # mc.menuItem("DojoTools", label = "RD_UI", c = createLytItem)
-        cmds.menuItem("DojoTools", label = "RD_UI")
+        cmds.menuItem("DojoTools", label = "RD_UI", c = createLytItem)
+        
 
-"""
+
 def createLytItem(*args):
     import Maya.System.RDojo_UI as RDojo_UI
     reload(RDojo_UI)
     RDojo_UI.RDojo_UI()
-"""
+
 
 createMenu()
