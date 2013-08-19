@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 
-class Rdojo_UI:
+class RDojo_UI:
     
     def __init__(self):
         print "In Rdojo_UI"
@@ -28,5 +28,5 @@ class Rdojo_UI:
 
 
 
-def doStuff(self, *args):
-    cmds.button(self.UI_Elements["hingeButton"], edit=True, en=False)
+    def doStuff(self, *args):
+        cmds.button(self.UI_Elements["hingeButton"], edit=True, en=False)

@@ -5,4 +5,4 @@ import maya.cmds as cmds
 
 sys.path.append(os.environ['Art Tools'])
 
-startup = pm.evalDeferred("import Maya.Startup")
+startup = pm.evalDeferred("import Startup")
