@@ -1,8 +1,5 @@
 import maya.cmds as cmds
 
-# changing default preferences
-
-cmds.currentUnit(time='ntsc')
 
 def createMenu():
         # Query the names of all "MayaWindows"
