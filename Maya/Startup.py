@@ -20,7 +20,7 @@ def createMenu():
 
 
 def createLytItem(*args):
-    import RDojo_UI as RDojo_UI
+    import Maya.System.RDojo_UI as RDojo_UI
     reload(RDojo_UI)
     RDojo_UI.RDojo_UI()
 
