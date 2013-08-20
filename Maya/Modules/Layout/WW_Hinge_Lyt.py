@@ -24,11 +24,10 @@ cmds.move( 23, 12, 0, listLocator[3], absolute=True )
 
 
 # deselect all
-cmds.select (cl=True); # prevents joints being parented to last created locator
+cmds.select (cl=True); # prevents joints being parented to any selected obect
 
 
-# creates joints based off each locator
-
+# create a joint based on the position values of the locator
 for eachLoc in listLocator:
     i = listLocator.index(eachLoc)
     item = str(listLocator[i])[3:] #slice first three chars from list item 
@@ -36,4 +35,4 @@ for eachLoc in listLocator:
     jointLoc = cmds.getAttr(item+'.translate') # jointLoc is an array of the position vals for the locator
     
     # cmds.select (cl=True); # prevents parenting
-    cmds.joint (p=(jointLoc[0][0], jointLoc[0][1], jointLoc[0][2]), n=item+'_jnt') 
+    cmds.joint (p=(jointLoc[0][0], jointLoc[0][1], jointLoc[0][2]), n=item+'_jnt')

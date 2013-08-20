@@ -8,21 +8,21 @@ def createMenu():
         for m in mi:
             print m
             # If a name matches "UserScripts", delete
-            if m == "DojoTools":
-                cmds.deleteUI("DojoTools", m = True)
+            if m == "RiggingTools":
+                cmds.deleteUI("RiggingTools", m = True)
                 
             # Create the "UserScripts" menu
-        cmds.menu('DojoTools', label='DojoTools', to=True, p="MayaWindow")
+        cmds.menu('RiggingTools', label='RiggingTools', to=True, p="MayaWindow")
         
         # Create a menu item for the RDojo UI
-        cmds.menuItem("DojoTools", label = "RD_UI", c = createLytItem)
+        cmds.menuItem("RiggingTools", label = "armRig_UI", c = createLytItem)
         
 
 
 def createLytItem(*args):
-    import Maya.System.RDojo_UI as RDojo_UI
-    reload(RDojo_UI)
-    RDojo_UI.RDojo_UI()
+    import Maya.System.armRig_UI as armRig_UI
+    reload(armRig_UI)
+    armRig_UI.armRig_UI()
 
 
 createMenu()
