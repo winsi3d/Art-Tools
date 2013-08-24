@@ -27,24 +27,56 @@ class Arm_Rig:
 		# clears the selection to prevent joints being parents to any selected object
 		cmds.select(cl=True)
 
+		# creates an empty list for the BIND joint chain
+		BIND_Arm_Joints = []
 
 		# creates the BIND joints for each item in armLocatorList
 		for each in armLocatorList:
 			pos = cmds.xform(each, q=True, t=True)
 			print pos
 
-			cmds.joint(p=pos, n="BIND_"+each+"_jnt")
+			BIND_Arm_Joints.append(cmds.joint(p=pos, n="BIND_"+each+"_jnt"))
 
 		cmds.select(cl=True)
+
+		# creates an empty list for the IK joint chain
+		IK_Arm_Joints = []
 
 		# creates the IK joints for each item in armLocatorList
 		for each in armLocatorList:
-			cmds.joint(p=pos, n="IK_"+each+"_jnt")
+			pos = cmds.xform(each, q=True, t=True)
+			IK_Arm_Joints.append(cmds.joint(p=pos, n="IK_"+each+"_JNT"))
+
+		# assigns the start and end joint of the chain to the variables IKstartJoint and IKendJoint
+		IKstartJoint = IK_Arm_Joints[0]
+		IKendJoint = IK_Arm_Joints[len(IK_Arm_Joints)-2]
+
+		print IKstartJoint
+		print IKendJoint
+ 
+		# creates an IK handle
+		cmds.ikHandle(n="armIK_handle", sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver" )
 
 		cmds.select(cl=True)
+
+		# creates an empty list for the FK joint chain
+		FK_Arm_Joints = []
 
 		# creates the FK joints for each item in armLocatorList
 		for each in armLocatorList:
-			cmds.joint(p=pos, n="FK_"+each+"_jnt")
-			
+			pos = cmds.xform(each, q=True, t=True)
+			FK_Arm_Joints.append(cmds.joint(p=pos, n="FK_"+each+"_jnt"))
+
 		cmds.select(cl=True)
+
+
+		# constrain the IK and FK joint chains to the BIND chain
+		x = 0
+
+		for eachJoint in BIND_Arm_Joints:
+			cmds.parentConstraint(IK_Arm_Joints[x], FK_Arm_Joints[x], BIND_Arm_Joints[x])
+			x += 1
+
+
+		
+
