@@ -18,17 +18,33 @@ class Arm_Rig:
 
 
 	def WW_Arm_Rig(self):
-		# Add selection to the list
-		
+		# adds the selection to the list, armLocatorList
+		armLocatorList = cmds.ls(sl=True)
 
-"""
-		# create a joint based on the position values of the locator
-		for eachLoc in listLocator:
-			i = listLocator.index(eachLoc)
-	    	item = str(listLocator[i])[3:] #slice first three chars from list item 
-	    	item = item[:len(item)-2] # slice last two chars from list item
-	    	jointLoc = cmds.getAttr(item+'.translate') # jointLoc is an array of the position vals for the locator
-	    	
-	    	# cmds.select (cl=True); # prevents parenting
-	    	cmds.joint (p=(jointLoc[0][0], jointLoc[0][1], jointLoc[0][2]), n=item+'_jnt')
-"""
+		# prints the list
+		print armLocatorList
+
+		# clears the selection to prevent joints being parents to any selected object
+		cmds.select(cl=True)
+
+
+		# creates the BIND joints for each item in armLocatorList
+		for each in armLocatorList:
+			pos = cmds.xform(each, q=True, t=True)
+			print pos
+
+			cmds.joint(p=pos, n="BIND_"+each+"_jnt")
+
+		cmds.select(cl=True)
+
+		# creates the IK joints for each item in armLocatorList
+		for each in armLocatorList:
+			cmds.joint(p=pos, n="IK_"+each+"_jnt")
+
+		cmds.select(cl=True)
+
+		# creates the FK joints for each item in armLocatorList
+		for each in armLocatorList:
+			cmds.joint(p=pos, n="FK_"+each+"_jnt")
+			
+		cmds.select(cl=True)
