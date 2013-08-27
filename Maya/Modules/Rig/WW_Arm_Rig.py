@@ -20,6 +20,7 @@ class Arm_Rig:
 
 	FK_list = ""
 	IK_list = ""
+	IK_handle = ""
 
 	def WW_Arm_Rig(self):
 		# adds the selection to the list, armLocatorList
@@ -59,7 +60,8 @@ class Arm_Rig:
 		print IKendJoint
  
 		# creates an IK handle
-		cmds.ikHandle(n="armIK_handle", sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver" )
+		IK_handle = cmds.ikHandle(n="armIK_handle", sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver" )
+		print IK_handle
 
 		cmds.select(cl=True)
 
@@ -85,7 +87,7 @@ class Arm_Rig:
 		self.IK_list = IK_Arm_Joints
 
 	def callArmCtrl(self):
-		WW_Arm_Controls.Arm_Controls(self.FK_list, self.IK_list)
+		WW_Arm_Controls.Arm_Controls(self.FK_list, self.IK_list, self.IK_handle)
 
 
 
