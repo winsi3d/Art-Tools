@@ -5,6 +5,8 @@ Description: Creates an arm rig
 """
 
 import maya.cmds as cmds
+import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
+reload(WW_Arm_Controls)
 
 CLASS_NAME = "Arm_Rig"
 TITLE = "Arm_RIG"
@@ -16,6 +18,8 @@ class Arm_Rig:
 		print "In Arm Rig"
 		self.WW_Arm_Rig()
 
+	FK_list = ""
+	IK_list = ""
 
 	def WW_Arm_Rig(self):
 		# adds the selection to the list, armLocatorList
@@ -77,6 +81,13 @@ class Arm_Rig:
 			cmds.parentConstraint(IK_Arm_Joints[x], FK_Arm_Joints[x], BIND_Arm_Joints[x])
 			x += 1
 
+		self.FK_list = FK_Arm_Joints
+		self.IK_list = IK_Arm_Joints
 
-		
+	def callArmCtrl(self):
+		WW_Arm_Controls.Arm_Controls(self.FK_list, self.IK_list)
+
+
+
+
 

@@ -16,7 +16,6 @@ def createMenu():
         
         # Create a menu item for the RDojo UI
         cmds.menuItem("RiggingTools", label = "armRig_UI", c = createLytItem)
-        
 
 
 def createLytItem(*args):
