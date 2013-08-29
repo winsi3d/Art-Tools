@@ -48,11 +48,5 @@ class Arm_Switch:
 		cmds.parentConstraint(self.BIND_list[2], switchCtl[0], mo=True) #parent constrains the switch control to the wrist joint
 		cmds.addAttr(ln="switch", at="enum", en="FK:IK", k=True) #adds a switch attribute
 
-"""		cmds.setDrivenKeyframe(at=self.bindConstraints_list, cd=switchCtl[0].switch)
-
-		# when switch attr is on fk, 
-
-		cmds.setDrivenKeyframe( at='translateX', cd='curve1.rz' )
-
-
-"""
+		#cmds.setDrivenKeyframe()
+		#cmds.setDrivenKeyframe()

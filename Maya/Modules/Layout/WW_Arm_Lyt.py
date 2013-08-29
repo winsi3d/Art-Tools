@@ -20,7 +20,7 @@ class Arm_Lyt:
 	def WW_Arm_Lyt(self):
 		# Creates a list called listNames and add locator names to the list
 
-		listNames = [ "lctr_1_arm1", "lctr_l_arm2", "lctr_l_wrist", "lctrr_l_armEnd" ]
+		listNames = [ "L_shoulder", "L_elbow", "L_wrist", "L_armEnd" ]
 
 		listLocator = []
 
