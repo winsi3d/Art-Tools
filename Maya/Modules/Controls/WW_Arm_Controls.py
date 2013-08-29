@@ -91,7 +91,4 @@ class Arm_Controls:
 			if y == len(circleCtlGrp)-1:
 				break
 
-
-
-		# create an IK / FK switch
-		cmds.file("/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/IKFKswitch.ma", i=True) #imports the switch control
+		

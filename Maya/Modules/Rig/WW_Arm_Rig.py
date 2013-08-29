@@ -7,6 +7,8 @@ Description: Creates an arm rig
 import maya.cmds as cmds
 import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
 reload(WW_Arm_Controls)
+import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
+reload(WW_Arm_Switch)
 
 CLASS_NAME = "Arm_Rig"
 TITLE = "Arm_RIG"
@@ -21,6 +23,8 @@ class Arm_Rig:
 	FK_list = ""
 	IK_list = ""
 	IK_handle_list = ""
+	BIND_list = ""
+	bindConstraints_list = ""
 
 	def WW_Arm_Rig(self):
 		# adds the selection to the list, armLocatorList
@@ -80,18 +84,23 @@ class Arm_Rig:
 
 		# constrain the IK and FK joint chains to the BIND chain
 		x = 0
+		bindConstraints = []
 
 		for eachJoint in BIND_Arm_Joints:
-			cmds.parentConstraint(IK_Arm_Joints[x], FK_Arm_Joints[x], BIND_Arm_Joints[x])
+			bindConstraints.append(cmds.parentConstraint(IK_Arm_Joints[x], FK_Arm_Joints[x], BIND_Arm_Joints[x]))
 			x += 1
 
 		self.FK_list = FK_Arm_Joints
 		self.IK_list = IK_Arm_Joints
 		self.IK_handle_list = IK_handle
+		self.BIND_list = BIND_Arm_Joints
+		self.bindConstraints_list = bindConstraints
 
 	def callArmCtrl(self):
 		WW_Arm_Controls.Arm_Controls(self.FK_list, self.IK_list, self.IK_handle_list)
 
+	def callArmSwitch(self):
+		WW_Arm_Switch.Arm_Switch(self.FK_list, self.IK_list, self.IK_handle_list, self.BIND_list, self.bindConstraints_list)
 
 
 

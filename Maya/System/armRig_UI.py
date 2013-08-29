@@ -11,6 +11,8 @@ import Maya.Modules.Rig.WW_Arm_Rig as WW_Arm_Rig
 reload(WW_Arm_Rig)
 import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
 reload(WW_Arm_Controls)
+import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
+reload(WW_Arm_Switch)
 
 
 class armRig_UI:
@@ -56,4 +58,6 @@ class armRig_UI:
     def createArmControls(self, *args): 
         self.inst.callArmCtrl()
         print WW_Arm_Controls.DESCRIPTION
+        self.inst.callArmSwitch()
+        print WW_Arm_Switch.DESCRIPTION
 
