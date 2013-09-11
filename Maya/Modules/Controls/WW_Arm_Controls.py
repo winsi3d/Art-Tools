@@ -13,11 +13,6 @@ DESCRIPTION = "creates arm controls based off the rig"
 
 
 class Arm_Controls:
-
-	FK_list = ""
-	IK_list = ""
-	IK_handle_list = ""
-
 	def __init__(self, FK, IK, IKH):
 		print "In Arm controls"
 		
@@ -34,7 +29,7 @@ class Arm_Controls:
 		squareCtl = []
 		squareCtlGrp = []
 
-		cmds.file("/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/Cube.ma", i=True) #imports the cube control
+		cmds.file("/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma", i=True) #imports the cube control
 		cmds.select("curve1", r=True) #selects the curve
 		squareCtl.append(cmds.ls(sl=True)) #puts the curve in the squareCtl list
 		squareCtl.append(cmds.duplicate(n=IK_CTL_name + "_gimbal_CTL", )) #duplicated the curve and renames - creates the gimbal control
@@ -52,7 +47,7 @@ class Arm_Controls:
 		PV = []
 		PVGrp = []
 
-		cmds.file("/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVector.ma", i=True) #imports the pole vector control
+		cmds.file("/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma", i=True) #imports the pole vector control
 		cmds.select("PVcurve", r=True) #selects the curve
 		cmds.rename(IK_CTL_name + "_PV") # rename
 		cmds.xform(r=True, ro=(-90, 0, 0), s=(0.3, 0.3, 0.3)) #rotate the joint 90 degrees in x and scales down
@@ -90,5 +85,5 @@ class Arm_Controls:
 			y += 1
 			if y == len(circleCtlGrp)-1:
 				break
-
+				
 		

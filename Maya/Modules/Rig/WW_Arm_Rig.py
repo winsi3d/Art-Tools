@@ -20,11 +20,6 @@ class Arm_Rig:
 		print "In Arm Rig"
 		self.WW_Arm_Rig()
 
-	FK_list = ""
-	IK_list = ""
-	IK_handle_list = ""
-	BIND_list = ""
-	bindConstraints_list = ""
 
 	def WW_Arm_Rig(self):
 		# adds the selection to the list, armLocatorList
@@ -65,7 +60,7 @@ class Arm_Rig:
 		print IKendJoint
  
 		# creates an IK handle
-		cmds.ikHandle(n="armIK_handle", sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver" )
+		cmds.ikHandle(n="armIK_handle", sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver")
 		IK_handle = cmds.ls(sl=True)
 		print IK_handle
 
@@ -87,8 +82,12 @@ class Arm_Rig:
 		bindConstraints = []
 
 		for eachJoint in BIND_Arm_Joints:
-			bindConstraints.append(cmds.parentConstraint(IK_Arm_Joints[x], FK_Arm_Joints[x], BIND_Arm_Joints[x]))
+			bindConstraints.append(cmds.parentConstraint(FK_Arm_Joints[x], IK_Arm_Joints[x], BIND_Arm_Joints[x]))
 			x += 1
+
+		# hides the FK and IK arm joints
+		cmds.setAttr(str(FK_Arm_Joints[0]) + ".visibility", False)
+		cmds.setAttr(str(IK_Arm_Joints[0]) + ".visibility", False)
 
 		self.FK_list = FK_Arm_Joints
 		self.IK_list = IK_Arm_Joints

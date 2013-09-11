@@ -13,13 +13,6 @@ DESCRIPTION = "creates FK IK switch for the arm"
 
 
 class Arm_Switch:
-
-	FK_list = ""
-	IK_list = ""
-	IK_handle_list = ""
-	BIND_list = ""
-	bindConstraints_list = ""
-
 	def __init__(self, FK, IK, IKH, BIND, BINDconstraints):
 		print "In Arm switch"
 		
@@ -48,5 +41,26 @@ class Arm_Switch:
 		cmds.parentConstraint(self.BIND_list[2], switchCtl[0], mo=True) #parent constrains the switch control to the wrist joint
 		cmds.addAttr(ln="switch", at="enum", en="FK:IK", k=True) #adds a switch attribute
 
-		#cmds.setDrivenKeyframe()
-		#cmds.setDrivenKeyframe()
+
+		# sets the constraints to switch from FK to IK with the switch control
+		bindConstraints = self.bindConstraints_list
+		FKs = self.FK_list
+		IKs = self.IK_list
+		
+		x = 0
+		for each in bindConstraints:
+			constr_IK = str(each)[3:len(each)-3] + "." + IKs[x] + "W1"
+			constr_FK = str(each)[3:len(each)-3] + "." + FKs[x] + "W0"
+
+			cmds.connectAttr("IkFk_switch.switch", constr_IK)
+			reverseN = cmds.createNode("reverse", n=str(self.BIND_list[x]) + "_reverseNode")
+			cmds.connectAttr("IkFk_switch.switch", reverseN + ".inputX")
+			cmds.connectAttr(reverseN+ ".outputX", constr_FK)
+
+			x += 1
+			cmds.select(cl=True)
+
+		
+		#cmds.connectAttr(reverseN+ ".outputX", str(each)[3:len(each)-3] + "." + FKs[x] + "W0")
+
+			

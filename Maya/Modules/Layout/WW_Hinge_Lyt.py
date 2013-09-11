@@ -30,7 +30,7 @@ cmds.select (cl=True); # prevents joints being parented to any selected obect
 # create a joint based on the position values of the locator
 for eachLoc in listLocator:
     i = listLocator.index(eachLoc)
-    item = str(listLocator[i])[3:] #slice first three chars from list item 
+     #slice first three chars from list item 
     item = item[:len(item)-2] # slice last two chars from list item
     jointLoc = cmds.getAttr(item+'.translate') # jointLoc is an array of the position vals for the locator
     
