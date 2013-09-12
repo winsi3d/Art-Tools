@@ -60,7 +60,13 @@ class Arm_Switch:
 			x += 1
 			cmds.select(cl=True)
 
-		
-		#cmds.connectAttr(reverseN+ ".outputX", str(each)[3:len(each)-3] + "." + FKs[x] + "W0")
 
-			
+
+		import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
+		reload(WW_Arm_Controls)
+		print WW_Arm_Controls
+
+		
+		circle_list = WW_Arm_Controls.Arm_Controls(circleCtl)
+
+		print circle_list	
