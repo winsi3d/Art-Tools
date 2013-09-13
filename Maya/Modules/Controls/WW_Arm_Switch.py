@@ -67,6 +67,6 @@ class Arm_Switch:
 		print WW_Arm_Controls
 
 		
-		circle_list = WW_Arm_Controls.Arm_Controls(circleCtl)
+		circle_list = WW_Arm_Controls.Arm_Controls()
 
 		print circle_list	

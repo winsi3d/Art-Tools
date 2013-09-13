@@ -13,6 +13,7 @@ import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
 reload(WW_Arm_Controls)
 import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
 reload(WW_Arm_Switch)
+from functools import partial
 
 
 class armRig_UI:
@@ -36,13 +37,38 @@ class armRig_UI:
         self.UI_Elements["window"] = cmds.window(self.windowName, width = windowWidth, height = windowHeight, title = "armRig_UI", sizeable = True)
 
         self.UI_Elements["buttonLyt"] = cmds.flowLayout(v=True, width=windowWidth, height=windowHeight)
+
+        fileDirectory = "/Users/Winsi/Documents/Art Tools/Maya/Modules/Layout/"
+        for widget in self.returnWidgets(fileDirectory):
+            print widget
+
+            mod = __import__("Maya.Modules.Layout."+widget, {}, {}, [widget])
+            reload (mod)
+            title = mod.TITLE
+            description = mod.DESCRIPTION
+            classname = mod.CLASS_NAME
+
+            cmds.separator(p=self.UI_Elements["buttonLyt"])
+            self.UI_Elements["module_button_" + widget] = cmds.button(label=title, width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=partial(self.installWidget, widget))
+
+
+
+
         self.UI_Elements["Arm_LytButton"] = cmds.button(label="Arm Lyt", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmLyt)
         self.UI_Elements["Arm_RigButton"] = cmds.button(label="Arm Rig", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmRig)
         self.UI_Elements["Arm_ControlsButton"] = cmds.button(label="Arm Controls", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmControls)
 
+
+        
+
         
         cmds.showWindow(self.windowName)
 
+    def installWidget(self, widget, *args):
+        mod = __import__("Maya.Modules.Layout."+widget)
+        reload (mod)
+        widgetClass  = getattr(mod, mod.CLASS_NAME)
+        widgetInstance = widgetClass()
 
 
     def createArmLyt(self, *args):        
@@ -60,4 +86,10 @@ class armRig_UI:
         print WW_Arm_Controls.DESCRIPTION
         self.inst.callArmSwitch()
         print WW_Arm_Switch.DESCRIPTION
+
+    def returnWidgets(self, path, *args):
+        import File_Utils as fileUtils
+        reload(fileUtils)
+        allPyFiles = fileUtils.findAllFiles(path, ".py")
+        return allPyFiles
 
