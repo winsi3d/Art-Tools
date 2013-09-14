@@ -7,6 +7,8 @@ Description: Creates an arm rig
 import maya.cmds as cmds
 import Maya.System.WW_Joint_Utils as Joint_Utils
 reload(Joint_Utils)
+import Maya.System.WW_Rig_Utils as Rig_Utils
+reload(Rig_Utils)
 #import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
 #reload(WW_Arm_Controls)
 #import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
@@ -31,14 +33,15 @@ class Arm_Rig:
 			print "Root is selected"
 
 			rootChildren = cmds.listRelatives(rootLoc, allDescendents = True, type = "transform")
+
 			for each in rootChildren:
 				pos = cmds.xform(each, q=True, ws=True, t=True)
 				locatorInfo.append([each, pos])
-			locatorInfo = locatorInfo.reverse()
-			print locatorInfo
+
+
+			locatorInfo.reverse()
 
 			self.Arm_Rig(locatorInfo)
-
 
 		else:
 			return cmds.headsUpMessage("Please Select A Root")
@@ -50,37 +53,12 @@ class Arm_Rig:
 		FK_Arm_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
 		IK_Arm_Joints = Joint_Utils.BuildJoints("IK_", locatorInfo)
 
+		cmds.select(cl=True)
+
+		print BIND_Arm_Joints
+
 
 """
-		# adds the selection to the list, armLocatorList
-		armLocatorList = cmds.ls(sl=True)
-
-		# prints the list
-		print armLocatorList
-
-		# clears the selection to prevent joints being parents to any selected object
-		cmds.select(cl=True)
-
-		# creates an empty list for the BIND joint chain
-		BIND_Arm_Joints = []
-
-		# creates the BIND joints for each item in armLocatorList
-		for each in armLocatorList:
-			pos = cmds.xform(each, q=True, t=True)
-			print pos
-
-			BIND_Arm_Joints.append(cmds.joint(p=pos, n="BIND_"+each+"_jnt"))
-
-		cmds.select(cl=True)
-
-		# creates an empty list for the IK joint chain
-		IK_Arm_Joints = []
-		IK_handle = []
-
-		# creates the IK joints for each item in armLocatorList
-		for each in armLocatorList:
-			pos = cmds.xform(each, q=True, t=True)
-			IK_Arm_Joints.append(cmds.joint(p=pos, n="IK_"+each+"_JNT"))
 
 		# assigns the start and end joint of the chain to the variables IKstartJoint and IKendJoint
 		IKstartJoint = IK_Arm_Joints[0]

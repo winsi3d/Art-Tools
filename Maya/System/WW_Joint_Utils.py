@@ -15,4 +15,5 @@ def BuildJoints(prefix, locatorInfo):
 		jnt = cmds.joint(n=jntName, p=each[1])
 		jointInfo.append(jnt)
 
+
 	return jointInfo

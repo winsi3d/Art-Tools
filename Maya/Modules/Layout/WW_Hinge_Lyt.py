@@ -38,13 +38,11 @@ class Hinge_Lyt:
 
 		# parents the locators to the root locator
 		x = 0
-		for item in loc_list:
-			cmds.parent(loc_list[x+1], loc_list[0])
+		while x < (len(loc_list)-1):
+			cmds.parent(loc_list[x+1], loc_list[x])
 			x += 1
 
-			if loc_list[x] == len(loc_list)-1:
-				break
-				x = 0
+
 
 
 		cmds.select(cl=True)
