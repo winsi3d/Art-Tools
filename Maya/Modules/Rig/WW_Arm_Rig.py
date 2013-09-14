@@ -63,6 +63,13 @@ class Arm_Rig:
 
 		Rig_Utils.constrainFKIK(BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints)	
 
+
+
+		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
+
+		Rig_Utils.createFKControls(FK_Arm_Joints)
+		Rig_Utils.createIKControls(path, IK_Arm_Joints)
+
 """
 
 	def callArmCtrl(self):
