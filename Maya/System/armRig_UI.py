@@ -5,8 +5,8 @@ Description: Creates an arm rig
 """
 
 import maya.cmds as cmds
-import Maya.Modules.Layout.WW_Arm_Lyt as WW_Arm_Lyt
-reload(WW_Arm_Lyt)
+import Maya.Modules.Layout.WW_Hinge_Lyt as Hinge_Lyt
+reload(Hinge_Lyt)
 import Maya.Modules.Rig.WW_Arm_Rig as WW_Arm_Rig
 reload(WW_Arm_Rig)
 import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
@@ -54,7 +54,7 @@ class armRig_UI:
 
 
 
-        self.UI_Elements["Arm_LytButton"] = cmds.button(label="Arm Lyt", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmLyt)
+        
         self.UI_Elements["Arm_RigButton"] = cmds.button(label="Arm Rig", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmRig)
         self.UI_Elements["Arm_ControlsButton"] = cmds.button(label="Arm Controls", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmControls)
 
@@ -62,18 +62,15 @@ class armRig_UI:
         
 
         
-        cmds.showWindow(self.windowName)
+        cmds.showWindow(self.UI_Elements["window"])
+
+
 
     def installWidget(self, widget, *args):
-        mod = __import__("Maya.Modules.Layout."+widget)
+        mod = __import__("Maya.Modules.Layout."+widget, {}, {}, [widget])
         reload (mod)
         widgetClass  = getattr(mod, mod.CLASS_NAME)
         widgetInstance = widgetClass()
-
-
-    def createArmLyt(self, *args):        
-        WW_Arm_Lyt.Arm_Lyt()
-        print WW_Arm_Lyt.DESCRIPTION
 
     inst = ""
 

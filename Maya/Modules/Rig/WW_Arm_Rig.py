@@ -5,10 +5,12 @@ Description: Creates an arm rig
 """
 
 import maya.cmds as cmds
-import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
-reload(WW_Arm_Controls)
-import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
-reload(WW_Arm_Switch)
+import Maya.System.WW_Joint_Utils as Joint_Utils
+reload(Joint_Utils)
+#import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
+#reload(WW_Arm_Controls)
+#import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
+#reload(WW_Arm_Switch)
 
 CLASS_NAME = "Arm_Rig"
 TITLE = "Arm_RIG"
@@ -18,10 +20,38 @@ DESCRIPTION = "builds an arm rig"
 class Arm_Rig:
 	def __init__(self):
 		print "In Arm Rig"
-		self.WW_Arm_Rig()
+
+		locatorInfo = []
+		rootLoc = cmds.ls(sl=True)
+
+		rootCheck = rootLoc[0].partition("_")[2]
 
 
-	def WW_Arm_Rig(self):
+		if rootCheck == "root":
+			print "Root is selected"
+
+			rootChildren = cmds.listRelatives(rootLoc, allDescendents = True, type = "transform")
+			for each in rootChildren:
+				pos = cmds.xform(each, q=True, ws=True, t=True)
+				locatorInfo.append([each, pos])
+			locatorInfo = locatorInfo.reverse()
+			print locatorInfo
+
+			self.Arm_Rig(locatorInfo)
+
+
+		else:
+			return cmds.headsUpMessage("Please Select A Root")
+
+
+
+	def Arm_Rig(self, locatorInfo):
+		BIND_Arm_Joints = Joint_Utils.BuildJoints("BIND_", locatorInfo)
+		FK_Arm_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
+		IK_Arm_Joints = Joint_Utils.BuildJoints("IK_", locatorInfo)
+
+
+"""
 		# adds the selection to the list, armLocatorList
 		armLocatorList = cmds.ls(sl=True)
 
@@ -103,4 +133,4 @@ class Arm_Rig:
 
 
 
-
+	"""

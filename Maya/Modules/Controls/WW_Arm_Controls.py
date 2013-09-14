@@ -13,7 +13,7 @@ DESCRIPTION = "creates arm controls based off the rig"
 
 
 class Arm_Controls:
-	def __init__(self, FK, IK, IKH):
+	def __init__():
 		print "In Arm controls"
 		
 		self.FK_list = FK
@@ -23,7 +23,7 @@ class Arm_Controls:
 		self.WW_Arm_Controls()
 
 
-	def WW_Arm_Controls(self):
+	def WW_Arm_Controls(self, FK, IK, IKH):
 		# create a square controller for the IK chain
 		IK_CTL_name = "L_IK_arm" #change name of ik arm control here
 		squareCtl = []
