@@ -77,9 +77,6 @@ class Arm_Controls:
 			cmds.orientConstraint(circleCtl[x], self.FK_list[x], mo = True) #parent constrains the joint to the controller
 			x += 1
 
-		return circleCtl
-
-		# parents the controllers up the hierachy
 		y = 0
 
 		for eachGroup in circleCtlGrp:
@@ -87,5 +84,10 @@ class Arm_Controls:
 			y += 1
 			if y == len(circleCtlGrp)-1:
 				break
+
+		return circleCtl
+
+		# parents the controllers up the hierachy
+		
 				
 		
