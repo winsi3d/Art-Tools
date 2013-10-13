@@ -17,11 +17,3 @@ def findAllFiles(fileDirectory, fileExtension):
             
             
     return returnFiles
-
-
-fileDirectory = "/Users/Winsi/Documents/Art Tools/Maya/Modules/Layout"
-fileExtension = ".py"
-
-pyFiles = findAllFiles (fileDirectory, fileExtension)
-
-print pyFiles

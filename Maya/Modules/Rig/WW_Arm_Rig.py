@@ -13,14 +13,17 @@ reload(Joint_Utils)
 #reload(WW_Arm_Switch)
 
 CLASS_NAME = "Arm_Rig"
-TITLE = "Arm_RIG"
+TITLE = "Arm_Rig"
 DESCRIPTION = "builds an arm rig"
 
 
 class Arm_Rig:
 	def __init__(self):
 		print "In Arm Rig"
+		self.Arm_Lyt_Check()
 
+
+	def Arm_Lyt_Check(self, *args):
 		locatorInfo = []
 		rootLoc = cmds.ls(sl=True)
 
@@ -59,16 +62,19 @@ class Arm_Rig:
 		import Maya.System.WW_Rig_Utils as Rig_Utils
 		reload(Rig_Utils)
 
-		Rig_Utils.createIK("L_Arm", IK_Arm_Joints[0], IK_Arm_Joints[2])
+		IK_handle = Rig_Utils.createIK("L_Arm", IK_Arm_Joints[0], IK_Arm_Joints[2])
 
 		Rig_Utils.constrainFKIK(BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints)	
 
-
+		Rig_Utils.createStretchy(IK_Arm_Joints[0], IK_handle, IK_Arm_Joints[1], IK_Arm_Joints[2])
 
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 
 		Rig_Utils.createFKControls(FK_Arm_Joints)
-		Rig_Utils.createIKControls(path, IK_Arm_Joints)
+
+
+		
+		Rig_Utils.createIKControls(path, IK_Arm_Joints, IK_handle)
 
 """
 

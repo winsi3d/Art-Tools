@@ -20,7 +20,7 @@ class armRig_UI:
     
     def __init__(self):
         print "In armRig_UI"
-        
+            
    
         self.UI_Elements = {}
         
@@ -49,13 +49,28 @@ class armRig_UI:
             classname = mod.CLASS_NAME
 
             cmds.separator(p=self.UI_Elements["buttonLyt"])
-            self.UI_Elements["module_button_" + widget] = cmds.button(label=title, width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=partial(self.installWidget, widget))
+            self.UI_Elements["module_button_" + widget] = cmds.button(label=title, width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=partial(self.installLytWidget, widget))
+
+
+
+        fileDirectory = "/Users/Winsi/Documents/Art Tools/Maya/Modules/Rig/"
+        for widget in self.returnWidgets(fileDirectory):
+            print widget
+
+            mod = __import__("Maya.Modules.Rig."+widget, {}, {}, [widget])
+            reload (mod)
+            title = mod.TITLE
+            description = mod.DESCRIPTION
+            classname = mod.CLASS_NAME
+
+            cmds.separator(p=self.UI_Elements["buttonLyt"])
+            self.UI_Elements["module_button_" + widget] = cmds.button(label=title, width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=partial(self.installRigWidget, widget))
 
 
 
 
         
-        self.UI_Elements["Arm_RigButton"] = cmds.button(label="Arm Rig", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmRig)
+        #self.UI_Elements["Arm_RigButton"] = cmds.button(label="Arm Rig", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmRig)
         self.UI_Elements["Arm_ControlsButton"] = cmds.button(label="Arm Controls", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmControls)
 
 
@@ -66,17 +81,27 @@ class armRig_UI:
 
 
 
-    def installWidget(self, widget, *args):
+    def installLytWidget(self, widget, *args):
         mod = __import__("Maya.Modules.Layout."+widget, {}, {}, [widget])
         reload (mod)
         widgetClass  = getattr(mod, mod.CLASS_NAME)
         widgetInstance = widgetClass()
 
+
+
+    def installRigWidget(self, widget, *args):
+        mod = __import__("Maya.Modules.Rig."+widget, {}, {}, [widget])
+        reload (mod)
+        widgetClass  = getattr(mod, mod.CLASS_NAME)
+        widgetInstance = widgetClass()
+
+
+
     inst = ""
 
-    def createArmRig(self, *args):        
-        self.inst = WW_Arm_Rig.Arm_Rig()
-        print WW_Arm_Rig.DESCRIPTION
+    #def createArmRig(self, *args):        
+    #    self.inst = WW_Arm_Rig.Arm_Rig()
+    #    print WW_Arm_Rig.DESCRIPTION
 
     def createArmControls(self, *args): 
         self.inst.callArmCtrl()
