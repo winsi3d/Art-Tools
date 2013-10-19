@@ -50,40 +50,36 @@ class Arm_Rig:
 
 
 	def Arm_Rig(self, locatorInfo):
+		part = "L_Arm"
+
+		# creates the Bind, FK, and IK joints
 		BIND_Arm_Joints = Joint_Utils.BuildJoints("BIND_", locatorInfo)
 		FK_Arm_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
 		IK_Arm_Joints = Joint_Utils.BuildJoints("IK_", locatorInfo)
 
 		cmds.select(cl=True)
 
-		print BIND_Arm_Joints
-
-
 		import Maya.System.WW_Rig_Utils as Rig_Utils
 		reload(Rig_Utils)
 
-		IK_handle = Rig_Utils.createIK("L_Arm", IK_Arm_Joints[0], IK_Arm_Joints[2])
 
-		Rig_Utils.constrainFKIK(BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints)	
+		# creates the IK handle
+		IK_handle = Rig_Utils.createIK(part, IK_Arm_Joints[0], IK_Arm_Joints[2])
 
-		Rig_Utils.createStretchy(IK_Arm_Joints[0], IK_handle, IK_Arm_Joints[1], IK_Arm_Joints[2])
+		# constrains the FK and IK joints to the Bind joints
+		bindConstraints = Rig_Utils.constrainFKIK(BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints)	
 
+		# create stretchy IK
+		Stretchy = Rig_Utils.createStretchy(part, IK_Arm_Joints[0], IK_handle, IK_Arm_Joints[1], IK_Arm_Joints[2])
+
+		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
+		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
+		FK_Controls = Rig_Utils.createFKControls(part, FK_Arm_Joints)
+		IK_Controls = Rig_Utils.createIKControls(part, path, IK_Arm_Joints, IK_handle, PVpath)
 
-		Rig_Utils.createFKControls(FK_Arm_Joints)
+		# create the FK IK switch
+		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
+		FKIKSwitch = Rig_Utils.FKIKSwitch(part, SwitchPath, BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints, bindConstraints, FK_Controls, IK_Controls)
 
-
-		
-		Rig_Utils.createIKControls(path, IK_Arm_Joints, IK_handle)
-
-"""
-
-	def callArmCtrl(self):
-		WW_Arm_Controls.Arm_Controls(self.FK_list, self.IK_list, self.IK_handle_list)
-
-	def callArmSwitch(self):
-		WW_Arm_Switch.Arm_Switch(self.FK_list, self.IK_list, self.IK_handle_list, self.BIND_list, self.bindConstraints_list)
-
-
-
-	"""
+		Rig_Utils.CleanUp(FK_Controls, IK_Controls, BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints, part, FKIKSwitch, Stretchy)
