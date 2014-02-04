@@ -69,10 +69,7 @@ class armRig_UI:
 
 
 
-        
-        #self.UI_Elements["Arm_RigButton"] = cmds.button(label="Arm Rig", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmRig)
-        self.UI_Elements["Arm_ControlsButton"] = cmds.button(label="Arm Controls", width=buttonWidth, height=buttonHeight, p=self.UI_Elements["buttonLyt"], c=self.createArmControls)
-
+    
 
         
 

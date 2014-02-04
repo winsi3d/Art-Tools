@@ -26,21 +26,35 @@ class Hinge_Lyt:
 		ArmLocNames = Lyt_Utils.ArmLocatorNames
 		ArmLocPos = Lyt_Utils.ArmLocatorPos
 
+		LegLocNames = Lyt_Utils.LegLocatorNames
+		LegLocPos = Lyt_Utils.LegLocatorPos
+
 
 		# creates locators based on names and positions in ArmLocNames and ArmLocPos
-		loc_list = []
+		arm_loc_list = []
+		leg_loc_list = []
 
 		for each in ArmLocNames:
-			loc_list.append(cmds.spaceLocator(n="L_"+each))
+			arm_loc_list.append(cmds.spaceLocator(n="L_"+each))
 			cmds.xform(cp=True)
 			cmds.xform(t=ArmLocPos[ArmLocNames.index(each)])
+
+		for each in LegLocNames:
+			leg_loc_list.append(cmds.spaceLocator(n="L_"+each))
+			cmds.xform(cp=True)
+			cmds.xform(t=LegLocPos[LegLocNames.index(each)])
 
 
 		# parents the locators to the root locator
 		x = 0
-		while x < (len(loc_list)-1):
-			cmds.parent(loc_list[x+1], loc_list[x])
+		while x < (len(arm_loc_list)-1):
+			cmds.parent(arm_loc_list[x+1], arm_loc_list[x])
 			x += 1
+
+		y = 0
+		while y < (len(leg_loc_list)-1):
+			cmds.parent(leg_loc_list[y+1], leg_loc_list[y])
+			y += 1
 
 
 

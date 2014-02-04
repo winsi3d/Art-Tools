@@ -7,10 +7,7 @@ Description: Creates an arm rig
 import maya.cmds as cmds
 import Maya.System.WW_Joint_Utils as Joint_Utils
 reload(Joint_Utils)
-#import Maya.Modules.Controls.WW_Arm_Controls as WW_Arm_Controls
-#reload(WW_Arm_Controls)
-#import Maya.Modules.Controls.WW_Arm_Switch as WW_Arm_Switch
-#reload(WW_Arm_Switch)
+
 
 CLASS_NAME = "Arm_Rig"
 TITLE = "Arm_Rig"
@@ -26,9 +23,11 @@ class Arm_Rig:
 	def Arm_Lyt_Check(self, *args):
 		locatorInfo = []
 		rootLoc = cmds.ls(sl=True)
+		print rootLoc
+		print rootLoc[0]
 
-		rootCheck = rootLoc[0].partition("_")[2]
-
+		rootCheck = rootLoc[0].rpartition("_")[2]
+		print rootCheck
 
 		if rootCheck == "root":
 			print "Root is selected"
