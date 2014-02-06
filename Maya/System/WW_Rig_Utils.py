@@ -84,11 +84,24 @@ def createFKControls(part, FK_Arm_Joints):
 
 
 
-def createIKControls(part, path, IK_Arm_Joints, IK_handle, PVpath):
+def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	print "In Create IK Controls"
 
 	Ctl = []
 	CtlGrp = []
+
+	# Find the IK effector joint
+	IKEffectorJnt = cmds.listConnections(IK_handle[1])
+	print IKEffectorJnt
+
+	# Find the PV joint from the effector joint
+	PVJoint = cmds.listRelatives(IKEffectorJnt[1], parent=True)
+	print PVJoint
+	
+
+	"""
+	Controls
+	"""
 
 	# import the cube control, rename, and add it to Ctl list
 	cmds.file(path, i=True)
@@ -111,13 +124,17 @@ def createIKControls(part, path, IK_Arm_Joints, IK_handle, PVpath):
 	CtlGrp.append(cmds.group(n=part + "_IK_CTL_GRP"))
 
 	# parent constrain the group to the joint to place get the translations and rotations from the joint, and deletes the constraint
-	ik_pctemp = cmds.parentConstraint(IK_Arm_Joints[2], CtlGrp, mo=False)
+	ik_pctemp = cmds.parentConstraint(IKEffectorJnt[1], CtlGrp, mo=False)
 	cmds.delete(ik_pctemp)
 
 	# parent the IK handle to the controller
 	cmds.parent(IK_handle[0], Ctl[1])
 
 
+
+	"""
+	Pole Vector
+	"""
 
 	# create a pole vector control
 	PV = []
@@ -129,18 +146,18 @@ def createIKControls(part, path, IK_Arm_Joints, IK_handle, PVpath):
 	cmds.rename(part + "_PV")
 
 	# rotate the joint 90 degrees in x and scale down
-	cmds.xform(r=True, ro=(-90, 0, 0), s=(0.3, 0.3, 0.3))
+	cmds.xform(r=True, ro=(-90, 0, 0), s=(0.2, 0.2, 0.2))
 
 	# group it to itself
 	PV.append(cmds.ls(sl=True))
 	PVGrp.append(cmds.group(n=part + "_PV_GRP"))
 
 	# point constrain to snap it to the elbow, and delete the constraint
-	pv_pctemp = cmds.pointConstraint(IK_Arm_Joints[1], PVGrp[0], mo=False)
+	pv_pctemp = cmds.pointConstraint(PVJoint[0], PVGrp[0], mo=False)
 	cmds.delete(pv_pctemp)
 
 	# move it back in space and freeze transformations
-	cmds.xform(PV[0], r=True, t=(0, 0, -10))
+	cmds.xform(PV[0], r=True, t=(PVtranslate))
 	cmds.select(PV[0], r=True)
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
@@ -209,9 +226,10 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2):
 
 
 
-def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Controls, IK_Controls):
+def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate):
 	print "In FK IK Switch"
-	
+	print "BAAAAAH"
+	print IK_Controls
 
 	# create an IK / FK switch
 	switchCtl = []
@@ -226,11 +244,11 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 	switchCtl.append(cmds.ls(sl=True))
 
 	# point constrain to snap it in place and delete the constraint
-	switch_pctemp = cmds.pointConstraint(BIND_list[2], switchCtl[0], mo=False)
+	switch_pctemp = cmds.pointConstraint(IK_Controls[0][0], switchCtl[0], mo=False)
 	cmds.delete(switch_pctemp)
 
 	# place the switch controller and freezes transformation
-	cmds.xform(switchCtl[0], r=True, t=(0, 2, 0), ro=(90, 0, 0), s=(0.5, 0.5, 0.5))
+	cmds.xform(switchCtl[0], r=True, t=(SwitchTranslate), ro=(90, 0, 0), s=(0.5, 0.5, 0.5))
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
 	# parent constrains the switch control
@@ -260,9 +278,9 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 	cmds.connectAttr(switchName + ".switch", str(IK_Controls[0][0][0]) + ".visibility")
 	cmds.connectAttr(switchName + ".switch", str(IK_Controls[1][0][0]) + ".visibility")
 
-	VizReverse = cmds.createNode("reverse", n = "FK_visibility_reverseNode")
-	cmds.connectAttr(switchName + ".switch", "FK_visibility_reverseNode.inputX")
-	cmds.connectAttr("FK_visibility_reverseNode.outputX", str(FK_Controls[0])[3:len(FK_Controls[0])-3] + ".visibility")
+	VizReverse = cmds.createNode("reverse", n = part + "_FK_visibility_reverseNode")
+	cmds.connectAttr(switchName + ".switch", str(part) + "_FK_visibility_reverseNode.inputX")
+	cmds.connectAttr(str(part) + "_FK_visibility_reverseNode.outputX", str(FK_Controls[0])[3:len(FK_Controls[0])-3] + ".visibility")
 
 
 	# locks and hides translate channels for the switch

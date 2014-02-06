@@ -50,6 +50,8 @@ class Leg_Rig:
 
 	def Leg_Rig(self, locatorInfo):
 		part = "L_Leg"
+		PVtranslate = (0, 0, 5)
+		SwitchTranslate = (2, 0, 0)
 
 		# creates the Bind, FK, and IK joints
 		BIND_Leg_Joints = Joint_Utils.BuildJoints("BIND_", locatorInfo)
@@ -78,12 +80,11 @@ class Leg_Rig:
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
 		FK_Controls = Rig_Utils.createFKControls(part, FK_Leg_Joints)
-		IK_Controls = Rig_Utils.createIKControls(part, path, IK_Leg_Joints, IK_handle, PVpath)
+		IK_Controls = Rig_Utils.createIKControls(part, path, IK_handle, PVpath, PVtranslate)
 
-"""
+
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
-		FKIKSwitch = Rig_Utils.FKIKSwitch(part, SwitchPath, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, bindConstraints, FK_Controls, IK_Controls)
+		FKIKSwitch = Rig_Utils.FKIKSwitch(part, SwitchPath, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
 
 		Rig_Utils.CleanUp(FK_Controls, IK_Controls, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, part, FKIKSwitch, Stretchy)
-"""
