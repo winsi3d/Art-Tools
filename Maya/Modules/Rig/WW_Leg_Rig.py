@@ -73,11 +73,12 @@ class Leg_Rig:
 
 		print IK_Leg_Joints
 		print IK_handle
+
 		# create stretchy IK
 		Stretchy = Rig_Utils.createStretchy(part, IK_Leg_Joints[1], IK_handle, IK_Leg_Joints[2], IK_Leg_Joints[3])
 
 		# create FK and IK controls
-		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
+		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/FootCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
 		FK_Controls = Rig_Utils.createFKControls(part, FK_Leg_Joints)
 		IK_Controls = Rig_Utils.createIKControls(part, path, IK_handle, PVpath, PVtranslate)
@@ -86,5 +87,7 @@ class Leg_Rig:
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
 		FKIKSwitch = Rig_Utils.FKIKSwitch(part, SwitchPath, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
+
+		Rig_Utils.FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls)
 
 		Rig_Utils.CleanUp(FK_Controls, IK_Controls, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, part, FKIKSwitch, Stretchy)

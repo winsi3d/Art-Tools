@@ -86,6 +86,7 @@ def createFKControls(part, FK_Arm_Joints):
 
 def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	print "In Create IK Controls"
+	print part
 
 	Ctl = []
 	CtlGrp = []
@@ -122,11 +123,45 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	
 	# groups the curve to itself
 	CtlGrp.append(cmds.group(n=part + "_IK_CTL_GRP"))
+	
 
 	# parent constrain the group to the joint to place get the translations and rotations from the joint, and deletes the constraint
-	ik_pctemp = cmds.parentConstraint(IKEffectorJnt[1], CtlGrp, mo=False)
-	cmds.delete(ik_pctemp)
+	if part.rpartition("_")[2] == "Arm":
+		ik_pctemp = cmds.parentConstraint(IKEffectorJnt[1], CtlGrp, mo=False)
+		cmds.delete(ik_pctemp)
 
+	elif part.rpartition("_")[2] == "Leg":
+		ik_pctemp = cmds.pointConstraint(IKEffectorJnt[1], CtlGrp, mo=False)
+		cmds.delete(ik_pctemp)
+		
+		cmds.select(Ctl[0])
+		cmds.addAttr(longName="Roll", attributeType="enum", en="---", keyable=True)
+		cmds.addAttr(longName="footRoll", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+		cmds.addAttr(longName="toeRoll", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+		cmds.addAttr(longName="toeWiggle", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+
+		cmds.addAttr(longName="Rock", attributeType="enum", en="---", keyable=True)
+		cmds.addAttr(longName="footRock", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+
+		cmds.addAttr(longName="Pivot", attributeType="enum", en="---", keyable=True)
+		cmds.addAttr(longName="toePivot", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+		cmds.addAttr(longName="ballPivot", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+		cmds.addAttr(longName="heelPivot", attributeType="float", min=-10, max=10, dv=0, keyable=True)
+
+		
+
+		cmds.setAttr(Ctl[0][0]+".Roll", lock=True)
+		cmds.setAttr(Ctl[0][0]+".Rock", lock=True)
+		cmds.setAttr(Ctl[0][0]+".Pivot", lock=True)
+		
+
+	cmds.select(Ctl[0])
+	cmds.addAttr(longName="Extra", attributeType="enum", en="---", keyable=True)
+	cmds.setAttr(Ctl[0][0]+".Extra", lock=True)
+	cmds.addAttr(longName="Gimbal", attributeType="bool", keyable=True)
+	cmds.connectAttr(Ctl[0][0]+".Gimbal", Ctl[1][0] + ".visibility")
+		
+		
 	# parent the IK handle to the controller
 	cmds.parent(IK_handle[0], Ctl[1])
 
@@ -228,8 +263,6 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2):
 
 def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate):
 	print "In FK IK Switch"
-	print "BAAAAAH"
-	print IK_Controls
 
 	# create an IK / FK switch
 	switchCtl = []
@@ -301,12 +334,19 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 	# locks and hides visibility channel
 	cmds.setAttr(switchName+".visibility", lock=True, keyable=False, channelBox=False)
 
+	if part.rpartition("_")[2] == "Arm":
+		cmds.setAttr(switchCtl[0][0] + ".switch", 0)
+	elif part.rpartition("_")[2] == "Leg":
+		cmds.setAttr(switchCtl[0][0] + ".switch", 1)
+
 
 	return switchCtl
 
 
 def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, FKIKSwitch, Stretchy):
 	print "In Rig Clean Up"
+	print IK_Controls
+	print IK_Controls[1][0][0]
 
 	for each in FK_Controls:
 		# locks and hides translate channels
@@ -333,10 +373,10 @@ def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, F
 		cmds.setAttr(str(each[0][0]) + ".visibility", lock=True, keyable=False, channelBox=False)
 
 
-		# locks and hides rotate channels for the PV
-		cmds.setAttr(str(each[0][0]) + ".rx", lock=True, keyable=False, channelBox=False)
-		cmds.setAttr(str(each[0][0]) + ".ry", lock=True, keyable=False, channelBox=False)
-		cmds.setAttr(str(each[0][0]) + ".rz", lock=True, keyable=False, channelBox=False)
+	# locks and hides rotate channels for the PV
+	cmds.setAttr(IK_Controls[1][0][0] + ".rx", lock=True, keyable=False, channelBox=False)
+	cmds.setAttr(IK_Controls[1][0][0] + ".ry", lock=True, keyable=False, channelBox=False)
+	cmds.setAttr(IK_Controls[1][0][0] + ".rz", lock=True, keyable=False, channelBox=False)
 
 
 	# locks and hides scale channels for the IK gimbal control
@@ -376,3 +416,55 @@ def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, F
 	cmds.parent(extras, mainGrpName)
 
 
+def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
+	print "In Foot Setup"
+	print IK_Leg_Joints
+
+	# Create the IK handles
+	ballIK = cmds.ikHandle(n="ball_ikHandle", sj=IK_Leg_Joints[3], ee=IK_Leg_Joints[5], sol="ikRPsolver")
+	toeIK = cmds.ikHandle(n="toe_ikHandle", sj=IK_Leg_Joints[5], ee=IK_Leg_Joints[6], sol="ikRPsolver")
+
+
+	# Create empty groups
+	footLiftGrp = cmds.group(empty=True, name="FootLift_Grp")
+	pctemp = cmds.pointConstraint(IK_Leg_Joints[3], footLiftGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(footLiftGrp, apply=True, t=1, r=1, s=1)
+
+
+	ballPivGrp = cmds.group(empty=True, name="BallPiv_Grp")
+	pctemp = cmds.pointConstraint(IK_Leg_Joints[5], ballPivGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(ballPivGrp, apply=True, t=1, r=1, s=1)
+
+	heelPivGrp = cmds.group(empty=True, name="HeelPiv_Grp")
+	pctemp = cmds.pointConstraint(IK_Leg_Joints[4], heelPivGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(heelPivGrp, apply=True, t=1, r=1, s=1)
+
+	toePivGrp = cmds.group(empty=True, name="ToePiv_Grp")
+	pctemp = cmds.pointConstraint(IK_Leg_Joints[6], toePivGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(toePivGrp, apply=True, t=1, r=1, s=1)
+
+	ankleLiftGrp = cmds.group(empty=True, name="AnkleLift_Grp")
+	pctemp = cmds.pointConstraint(IK_Leg_Joints[5], ankleLiftGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(ankleLiftGrp, apply=True, t=1, r=1, s=1)
+
+
+
+	cmds.parent(ballPivGrp, footLiftGrp)
+	cmds.parent(heelPivGrp, ballPivGrp)
+	cmds.parent(toePivGrp, heelPivGrp)
+	cmds.parent(ankleLiftGrp, toePivGrp)
+	cmds.parent(toeIK[0], toePivGrp)
+	cmds.parent(ballIK[0], ankleLiftGrp)
+	cmds.parent(IK_handle[0], ankleLiftGrp)
+
+	cmds.parent(footLiftGrp, IK_Controls[0][1])
+
+	
+
+
+	
