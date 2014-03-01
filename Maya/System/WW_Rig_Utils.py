@@ -464,7 +464,41 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 
 	cmds.parent(footLiftGrp, IK_Controls[0][1])
 
-	
 
 
-	
+	# Set up connections for IK foot attriutes
+
+
+	# Toe Pivot
+	toemultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="ToePiv_MultDiv")
+	cmds.setAttr(str(toemultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".toePivot", str(toemultdiv) + ".input1X")
+	cmds.setAttr(str(toemultdiv) + ".input2X", 6)
+	cmds.connectAttr(str(toemultdiv) + ".outputX", str(toePivGrp) + ".ry")
+
+	# Ball Pivot
+	ballmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="BallPiv_MultDiv")
+	cmds.setAttr(str(ballmultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".ballPivot", str(ballmultdiv) + ".input1X")
+	cmds.setAttr(str(ballmultdiv) + ".input2X", 3)
+	cmds.connectAttr(str(ballmultdiv) + ".outputX", str(ballPivGrp) + ".ry")
+
+	# Heel Pivot
+	footmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="HeelPiv_MultDiv")
+	cmds.setAttr(str(footmultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".heelPivot", str(footmultdiv) + ".input1X")
+	cmds.setAttr(str(footmultdiv) + ".input2X", 6)
+	cmds.connectAttr(str(footmultdiv) + ".outputX", str(heelPivGrp) + ".ry")
+
+
+
+"""
+
+
+
+Heel Pivot -10			HeelPiv_Grp ry -60
+Heel PIvot 0 			HeelPiv_Grp ry 0
+Heel PIvot 10			HeelPiv_Grp ry 60			
+
+
+"""
