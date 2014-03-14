@@ -5,6 +5,9 @@ Description: Builds Rig
 """
 
 import maya.cmds as cmds
+import Maya.Modules.Layout.WW_Hinge_Lyt as Hinge_Lyt
+reload(Hinge_Lyt)
+
 
 def createIK(part, IKstartJoint, IKendJoint):
 	print "In Create IK"
@@ -425,13 +428,6 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	toeIK = cmds.ikHandle(n="toe_ikHandle", sj=IK_Leg_Joints[5], ee=IK_Leg_Joints[6], sol="ikRPsolver")
 
 
-	# Create empty groups
-	footLiftGrp = cmds.group(empty=True, name="FootLift_Grp")
-	pctemp = cmds.pointConstraint(IK_Leg_Joints[3], footLiftGrp)
-	cmds.delete(pctemp)
-	cmds.makeIdentity(footLiftGrp, apply=True, t=1, r=1, s=1)
-
-
 	ballPivGrp = cmds.group(empty=True, name="BallPiv_Grp")
 	pctemp = cmds.pointConstraint(IK_Leg_Joints[5], ballPivGrp)
 	cmds.delete(pctemp)
@@ -452,21 +448,76 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	cmds.delete(pctemp)
 	cmds.makeIdentity(ankleLiftGrp, apply=True, t=1, r=1, s=1)
 
+	toeWiggleGrp = cmds.group(empty=True, name="ToeWiggle_Grp")
+	pctemp = cmds.pointConstraint(IK_Leg_Joints[5], toeWiggleGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(toeWiggleGrp, apply=True, t=1, r=1, s=1)
+
+	FootRockOuterGrp = cmds.group(empty=True, name="Outer_Foot_Rock_Grp")
+	pctemp = cmds.pointConstraint("*outer_foot_loc", FootRockOuterGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(FootRockOuterGrp, apply=True, t=1, r=1, s=1)
+
+	FootRockInnerGrp = cmds.group(empty=True, name="Inner_Foot_Rock_Grp")
+	pctemp = cmds.pointConstraint("*inner_foot_loc", FootRockInnerGrp)
+	cmds.delete(pctemp)
+	cmds.makeIdentity(FootRockInnerGrp, apply=True, t=1, r=1, s=1)
 
 
-	cmds.parent(ballPivGrp, footLiftGrp)
-	cmds.parent(heelPivGrp, ballPivGrp)
+	cmds.parent(FootRockInnerGrp, FootRockOuterGrp)
+	cmds.parent(FootRockOuterGrp, ballPivGrp)
+	cmds.parent(heelPivGrp, FootRockInnerGrp)
 	cmds.parent(toePivGrp, heelPivGrp)
 	cmds.parent(ankleLiftGrp, toePivGrp)
-	cmds.parent(toeIK[0], toePivGrp)
+	cmds.parent(toeIK[0], toeWiggleGrp)
+	cmds.parent(toeWiggleGrp, toePivGrp)
 	cmds.parent(ballIK[0], ankleLiftGrp)
 	cmds.parent(IK_handle[0], ankleLiftGrp)
 
-	cmds.parent(footLiftGrp, IK_Controls[0][1])
+	cmds.parent(ballPivGrp, IK_Controls[0][1])
 
 
 
-	# Set up connections for IK foot attriutes
+	# Set up connections for IK foot attributes
+
+	# Foot Roll (ball)
+	footrollclamp = cmds.shadingNode('clamp', asUtility=True, name="FootRoll_Clamp")
+	footrollmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="FootRoll_MultDiv")
+	cmds.connectAttr(IK_Controls[0][0][0] + ".footRoll", str(footrollclamp) + ".inputR")
+	cmds.connectAttr(str(footrollclamp) + ".outputR", str(footrollmultdiv) + ".input1X")
+	cmds.connectAttr(str(footrollmultdiv) + ".outputX", str(heelPivGrp) + ".rx")
+	cmds.setAttr(str(footrollclamp) + ".minR", -10)
+	cmds.setAttr(str(footrollclamp) + ".maxR", 0)
+	cmds.setAttr(str(footrollmultdiv) + ".operation", 1)
+	cmds.setAttr(str(footrollmultdiv) + ".input2X", 6)
+
+
+	# Foot Roll (heel)
+	heelrollclamp = cmds.shadingNode('clamp', asUtility=True, name="HeelRoll_Clamp")
+	heelrollmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="HeelRoll_MultDiv")
+	cmds.connectAttr(IK_Controls[0][0][0] + ".footRoll", str(heelrollclamp) + ".inputR")
+	cmds.connectAttr(str(heelrollclamp) + ".outputR", str(heelrollmultdiv) + ".input1X")
+	cmds.connectAttr(str(heelrollmultdiv) + ".outputX", str(ankleLiftGrp) + ".rx")
+	cmds.setAttr(str(heelrollclamp) + ".minR", 0)
+	cmds.setAttr(str(heelrollclamp) + ".maxR", 10)
+	cmds.setAttr(str(heelrollmultdiv) + ".operation", 1)
+	cmds.setAttr(str(heelrollmultdiv) + ".input2X", 9)
+
+
+	# Toe Roll
+	toerollmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="ToeRoll_MultDiv")
+	cmds.setAttr(str(toerollmultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".toeRoll", str(toerollmultdiv) + ".input1X")
+	cmds.setAttr(str(toerollmultdiv) + ".input2X", 8)
+	cmds.connectAttr(str(toerollmultdiv) + ".outputX", str(toePivGrp) + ".rx")
+
+
+	# Toe Wiggle
+	toewigglemultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="ToeWiggle_MultDiv")
+	cmds.setAttr(str(toewigglemultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".toeWiggle", str(toewigglemultdiv) + ".input1X")
+	cmds.setAttr(str(toewigglemultdiv) + ".input2X", 7)
+	cmds.connectAttr(str(toewigglemultdiv) + ".outputX", str(toeWiggleGrp) + ".rx")
 
 
 	# Toe Pivot
@@ -476,12 +527,14 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	cmds.setAttr(str(toemultdiv) + ".input2X", 6)
 	cmds.connectAttr(str(toemultdiv) + ".outputX", str(toePivGrp) + ".ry")
 
+
 	# Ball Pivot
 	ballmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="BallPiv_MultDiv")
 	cmds.setAttr(str(ballmultdiv) + ".operation", 1)
 	cmds.connectAttr(IK_Controls[0][0][0] + ".ballPivot", str(ballmultdiv) + ".input1X")
 	cmds.setAttr(str(ballmultdiv) + ".input2X", 3)
 	cmds.connectAttr(str(ballmultdiv) + ".outputX", str(ballPivGrp) + ".ry")
+
 
 	# Heel Pivot
 	footmultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="HeelPiv_MultDiv")
@@ -490,15 +543,5 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	cmds.setAttr(str(footmultdiv) + ".input2X", 6)
 	cmds.connectAttr(str(footmultdiv) + ".outputX", str(heelPivGrp) + ".ry")
 
-
-
-"""
-
-
-
-Heel Pivot -10			HeelPiv_Grp ry -60
-Heel PIvot 0 			HeelPiv_Grp ry 0
-Heel PIvot 10			HeelPiv_Grp ry 60			
-
-
-"""
+	### Foot Rock ###
+	

@@ -13,6 +13,9 @@ ArmLocatorPos = ([1.0, 15.0, 0.0], [1.7, 15.0, 0.0], [4.47, 15.0, -0.5], [7.2, 1
 LegLocatorNames = ["leg_root", "pelvis", "hip", "knee", "ankle", "heel", "ball", "toe_End"]
 LegLocatorPos = ([-0.06, 11.0, 0], [-0.06, 10.4, 0], [1.25, 9.8, 0], [1.25, 5.6, 0.15], [1.25, 1.50, -0.3], [1.25, 0.28, -1.00],[1.25, 0.28, 0.9], [1.25, 0.28, 1.9] )
 
+FootRockLocNames = ["outer_foot_loc", "inner_foot_loc"]
+FootRockPos = ([2, 0, 0], [0.5, 0, 0])
+
 """
 # Spine Locators
 SpineLocatorNames = ["root", "spine_01, spine_02, spine_03"]

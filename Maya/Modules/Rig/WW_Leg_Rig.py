@@ -7,6 +7,8 @@ Description: Creates a leg rig
 import maya.cmds as cmds
 import Maya.System.WW_Joint_Utils as Joint_Utils
 reload(Joint_Utils)
+import Maya.Modules.Layout.WW_Hinge_Lyt as Hinge_Lyt
+reload(Hinge_Lyt)
 
 
 CLASS_NAME = "Leg_Rig"
@@ -33,6 +35,7 @@ class Leg_Rig:
 			print "Root is selected"
 
 			rootChildren = cmds.listRelatives(rootLoc, allDescendents = True, type = "transform")
+			print rootChildren
 
 			for each in rootChildren:
 				pos = cmds.xform(each, q=True, ws=True, t=True)
