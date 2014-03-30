@@ -44,14 +44,14 @@ class Leg_Rig:
 
 			locatorInfo.reverse()
 
-			self.Leg_Rig(locatorInfo)
+			self.Leg_Rig(locatorInfo, rootLoc)
 
 		else:
 			return cmds.headsUpMessage("Please Select A Root")
 
 
 
-	def Leg_Rig(self, locatorInfo):
+	def Leg_Rig(self, locatorInfo, rootLoc):
 		part = "L_Leg"
 		PVtranslate = (0, 0, 5)
 		SwitchTranslate = (2, 0, 0)
@@ -61,11 +61,12 @@ class Leg_Rig:
 		FK_Leg_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
 		IK_Leg_Joints = Joint_Utils.BuildJoints("IK_", locatorInfo)
 
+		cmds.delete(rootLoc)
+
 		cmds.select(cl=True)
 
 		import Maya.System.WW_Rig_Utils as Rig_Utils
 		reload(Rig_Utils)
-
 
 
 		# creates the IK handle
@@ -74,23 +75,20 @@ class Leg_Rig:
 		# constrains the FK and IK joints to the Bind joints
 		bindConstraints = Rig_Utils.constrainFKIK(BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints)	
 
-		print IK_Leg_Joints
-		print IK_handle
-
-		# create stretchy IK
-		Stretchy = Rig_Utils.createStretchy(part, IK_Leg_Joints[1], IK_handle, IK_Leg_Joints[2], IK_Leg_Joints[3])
-
 		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/FootCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
 		FK_Controls = Rig_Utils.createFKControls(part, FK_Leg_Joints)
 		IK_Controls = Rig_Utils.createIKControls(part, path, IK_handle, PVpath, PVtranslate)
 
+		# create stretchy IK
+		Stretchy = Rig_Utils.createStretchy(part, IK_Leg_Joints[1], IK_handle, IK_Leg_Joints[2], IK_Leg_Joints[3], IK_Controls)
 
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
 		FKIKSwitch = Rig_Utils.FKIKSwitch(part, SwitchPath, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
 
 		Rig_Utils.FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls)
+
 
 		Rig_Utils.CleanUp(FK_Controls, IK_Controls, BIND_Leg_Joints, FK_Leg_Joints, IK_Leg_Joints, part, FKIKSwitch, Stretchy)

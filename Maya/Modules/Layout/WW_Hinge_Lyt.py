@@ -26,6 +26,9 @@ class Hinge_Lyt:
 		ArmLocNames = Lyt_Utils.ArmLocatorNames
 		ArmLocPos = Lyt_Utils.ArmLocatorPos
 
+		HandLocNames = Lyt_Utils.HandLocatorNames
+		HandLocPos = Lyt_Utils.HandLocatorPos
+
 		LegLocNames = Lyt_Utils.LegLocatorNames
 		LegLocPos = Lyt_Utils.LegLocatorPos
 
@@ -37,41 +40,77 @@ class Hinge_Lyt:
 
 		# creates locators based on names and positions in ArmLocNames and ArmLocPos
 		arm_loc_list = []
+		hand_loc_list = []
 		leg_loc_list = []
 		foot_loc_list = []
 
-		for each in ArmLocNames:
-			arm_loc_list.append(cmds.spaceLocator(n="L_"+each))
-			cmds.xform(cp=True)
-			cmds.xform(t=ArmLocPos[ArmLocNames.index(each)])
+		
+		arm_root_loc = cmds.spaceLocator(n="L+" + ArmLocNames[0])
+		cmds.xform(cp=True)
+		cmds.xform(t=ArmLocPos[0])
 
-		for each in LegLocNames:
-			leg_loc_list.append(cmds.spaceLocator(n="L_"+each))
-			cmds.xform(cp=True)
-			cmds.xform(t=LegLocPos[LegLocNames.index(each)])
+		cmds.select(cl=True)
+		
+
+		x = 1
+
+		for each in ArmLocNames[1:]:
+			arm_loc_list.append(cmds.joint(n="L_"+each, a=True, p=ArmLocPos[x]))
+			x += 1
+
+		for each in arm_loc_list:
+			cmds.joint( each, e=True, zso=True, oj='xyz', sao = 'yup' )
+
+
+		z = 0
+		for each in HandLocNames:
+			hand_loc_list.append(cmds.joint(n="L_"+each, a=True, p=HandLocPos[z]))
+			if (each == "hand") or (each == "thumb_04") or (each == "index_04") or (each == "middle_04") or (each == "ring_04") or (each == "pinky_04"):
+				cmds.select(cl=True)
+			z += 1
+
+		for each in hand_loc_list:
+			cmds.joint( each, e=True, zso=True, oj='xyz', sao = 'yup' )
+
+
+		cmds.parent("*thumb_01", "*hand")
+		cmds.parent("*index_01", "*hand")
+		cmds.parent("*middle_01", "*hand")
+		cmds.parent("*ring_01", "*hand")
+		cmds.parent("*pinky_01", "*hand")
+		
+
+
+		leg_root_loc = cmds.spaceLocator(n="L+" + LegLocNames[0])
+		cmds.xform(cp=True)
+		cmds.xform(t=LegLocPos[0])
+
+		cmds.select(cl=True)
+
+
+
+		y=1
+
+		for each in LegLocNames[1:]:
+			leg_loc_list.append(cmds.joint(n="L_"+each, a=True, p=LegLocPos[y]))
+			y += 1
+			#cmds.xform(cp=True)
+			#cmds.xform(t=LegLocPos[LegLocNames.index(each)])
 
 		for each in FootRockLocNames:
 			foot_loc_list.append(cmds.spaceLocator(n="L_"+each))
 			cmds.xform(cp=True)
 			cmds.xform(t=FootRockPos[FootRockLocNames.index(each)])
+
+		for each in leg_loc_list:
+			cmds.joint( each, e=True, zso=True, oj='xyz', sao = 'yup' )
 		
 
+		cmds.parent(arm_loc_list[0], arm_root_loc)
+		cmds.parent(leg_loc_list[0], leg_root_loc)
 
-
-		# parents the locators to the root locator
-		x = 0
-		while x < (len(arm_loc_list)-1):
-			cmds.parent(arm_loc_list[x+1], arm_loc_list[x])
-			x += 1
-
-		y = 0
-		while y < (len(leg_loc_list)-1):
-			cmds.parent(leg_loc_list[y+1], leg_loc_list[y])
-			y += 1
-
-		cmds.parentConstraint(leg_loc_list[len(leg_loc_list)-2], foot_loc_list[0], mo=True)
-		cmds.parentConstraint(leg_loc_list[len(leg_loc_list)-2], foot_loc_list[1], mo=True)
-
-
+		if cmds.objExists("*leg"):
+			cmds.parentConstraint(leg_loc_list[len(leg_loc_list)-2], foot_loc_list[0], mo=True)
+			cmds.parentConstraint(leg_loc_list[len(leg_loc_list)-2], foot_loc_list[1], mo=True)
 
 		cmds.select(cl=True)

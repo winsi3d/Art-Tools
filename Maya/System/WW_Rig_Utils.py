@@ -12,7 +12,7 @@ reload(Hinge_Lyt)
 def createIK(part, IKstartJoint, IKendJoint):
 	print "In Create IK"
 
-	IKName = part + "_IK_handle"
+	IKName = part + "_ikHandle"
 	IK_handle = cmds.ikHandle(n=IKName, sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver")
 	cmds.select(cl=True)
 
@@ -27,7 +27,7 @@ def constrainFKIK(BindJoints, FKJoints, IKJoints):
 	x = 0
 	bindConstraints = []
 	for eachJoint in BindJoints:
-		bindConstraints.append(cmds.parentConstraint(FKJoints[x], IKJoints[x], BindJoints[x]))
+		bindConstraints.append(cmds.parentConstraint(FKJoints[x], IKJoints[x], BindJoints[x], mo=True))
 		x += 1
 
 	# hides the FK and IK arm joints
@@ -38,7 +38,7 @@ def constrainFKIK(BindJoints, FKJoints, IKJoints):
 	return bindConstraints
 
 
-def createFKControls(part, FK_Arm_Joints):
+def createFKControls(part, FK_Joints, FK_Hand_Joints, BIND_Arm_Joints):
 	print "In Create FK Controls"
 
 	# create circle controllers for the FK chain
@@ -47,27 +47,27 @@ def createFKControls(part, FK_Arm_Joints):
 	x = 0
 
 
-	for eachJoint in FK_Arm_Joints:
+	for eachJoint in FK_Joints:
 
 		# set the name here
-		FKname = str(FK_Arm_Joints[x])[3:len(FK_Arm_Joints[x])-4]
+		FKname = str(FK_Joints[x])[3:len(FK_Joints[x])-4]
 
 		# create the controller
-		circleCtl.append(cmds.circle(sections=8, ch=False, n=FKname + "_CTL"))
+		circleCtl.append(cmds.circle(sections=8, ch=False, n=FKname + "_CTRL"))
 		
 		# rotates the joint 90 degrees in y and freeze transformations
-		cmds.xform(r=True, ro=(0, 90, 0), s=(1.5, 1.5, 1.5))
+		cmds.xform(r=True, ro=(0, 90, 0), s=(0.5, 0.5, 0.5))
 		cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
 		# groups the controller to itself, and renames
-		circleCtlGrp.append(cmds.group(n=FKname + "_CTL_GRP"))
+		circleCtlGrp.append(cmds.group(n=FKname + "_CTRL_GRP"))
 
 		#parent constrains the group to the joint to place it in the correct place, and deletes the constraint
-		fk_pctemp = cmds.parentConstraint(FK_Arm_Joints[x], circleCtlGrp[x], mo = False)
+		fk_pctemp = cmds.parentConstraint(FK_Joints[x], circleCtlGrp[x], mo = False)
 		cmds.delete(fk_pctemp)
 
-		# parent constrains the joint to the controller
-		cmds.orientConstraint(circleCtl[x], FK_Arm_Joints[x], mo = True)
+		# orient constrains the joint to the controller
+		cmds.orientConstraint(circleCtl[x], FK_Joints[x], mo = True)
 
 
 		x += 1
@@ -76,11 +76,35 @@ def createFKControls(part, FK_Arm_Joints):
 	y = 0
 
 	# parents the controls and groups up the hierarchy
+
 	for eachGroup in circleCtlGrp:
 		cmds.parent(circleCtlGrp[y+1], circleCtl[y])
 		y += 1
 		if y == len(circleCtlGrp)-1:
 			break
+
+
+
+	x = 0
+
+
+
+	handCtl = []
+	handCtlGrp = []
+
+	
+	#cmds.select("*pinky_01_CTRL_GRP", r=True)
+	#cmds.select("*ring_01_CTRL_GRP", add=True)
+	#cmds.select("*middle_01_CTRL_GRP", add=True)
+	#cmds.select("*index_01_CTRL_GRP", add=True)
+	#cmds.select("*thumb_01_CTRL_GRP", add=True)
+
+	#fingersConstraints = cmds.ls(sl=True)
+	#for each in fingersConstraints:
+	#	cmds.parentConstraint(BIND_Arm_Joints[len(BIND_Arm_Joints)-1], each)
+
+
+
 
 	return circleCtl
 
@@ -89,18 +113,15 @@ def createFKControls(part, FK_Arm_Joints):
 
 def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	print "In Create IK Controls"
-	print part
 
 	Ctl = []
 	CtlGrp = []
 
 	# Find the IK effector joint
 	IKEffectorJnt = cmds.listConnections(IK_handle[1])
-	print IKEffectorJnt
 
 	# Find the PV joint from the effector joint
 	PVJoint = cmds.listRelatives(IKEffectorJnt[1], parent=True)
-	print PVJoint
 	
 
 	"""
@@ -110,11 +131,11 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	# import the cube control, rename, and add it to Ctl list
 	cmds.file(path, i=True)
 	cmds.select("curve1", r=True)
-	cmds.rename(part + "_IK_CTL")
+	cmds.rename(part + "_IK_CTRL")
 	Ctl.append(cmds.ls(sl=True))
 
 	# duplicate the curve to create the gimbal control, and rename
-	Ctl.append(cmds.duplicate(n=part + "_IK_gimbal_CTL", ))
+	Ctl.append(cmds.duplicate(n=part + "_IK_gimbal_CTRL", ))
 	cmds.scale(0.8, 0.8, 0.8)
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
@@ -125,7 +146,7 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	cmds.select(Ctl[0], r=True)
 	
 	# groups the curve to itself
-	CtlGrp.append(cmds.group(n=part + "_IK_CTL_GRP"))
+	CtlGrp.append(cmds.group(n=part + "_IK_CTRL_Grp"))
 	
 
 	# parent constrain the group to the joint to place get the translations and rotations from the joint, and deletes the constraint
@@ -188,7 +209,7 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 
 	# group it to itself
 	PV.append(cmds.ls(sl=True))
-	PVGrp.append(cmds.group(n=part + "_PV_GRP"))
+	PVGrp.append(cmds.group(n=part + "_PV_Grp"))
 
 	# point constrain to snap it to the elbow, and delete the constraint
 	pv_pctemp = cmds.pointConstraint(PVJoint[0], PVGrp[0], mo=False)
@@ -206,7 +227,7 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 
 
 
-def createStretchy(part, start, end, stretchybone1, stretchybone2):
+def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
 	print "In Create Stretchy IK"
 
 	# find the positions of the start and end points
@@ -241,10 +262,12 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2):
 
 
 	# find the length when the arm is fully stretched and put value into multiply divide node inpux2X
-	restLength = cmds.getAttr(str(stretchybone1) + ".translateX") + cmds.getAttr(str(stretchybone2) + ".translateX")
+	pos1 = cmds.joint(stretchybone1, q=True, r=True, p=True)
+	pos2 = cmds.joint(stretchybone2, q=True, r=True, p=True)
+
+	restLength = pos1[0] + pos2[0]
 	cmds.setAttr(str(multdiv) + ".input2X", restLength)
-
-
+	
 	# create a condition node
 	stretchyCnd = cmds.shadingNode('condition', asUtility=True, name=part + "_stretchyCnd")
 	cmds.setAttr(str(stretchyCnd) + ".operation", 3)
@@ -259,6 +282,8 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2):
 	cmds.connectAttr(str(stretchyCnd) + ".outColorR", str(start) + ".scaleX")
 	cmds.connectAttr(str(stretchyCnd) + ".outColorR", str(stretchybone1) + ".scaleX")
 
+	print IK_Controls
+	print "ROBOT UNICORN"
 
 	return startLoc, endLoc, distanceNode
 
@@ -348,8 +373,6 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 
 def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, FKIKSwitch, Stretchy):
 	print "In Rig Clean Up"
-	print IK_Controls
-	print IK_Controls[1][0][0]
 
 	for each in FK_Controls:
 		# locks and hides translate channels
@@ -383,9 +406,9 @@ def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, F
 
 
 	# locks and hides scale channels for the IK gimbal control
-	cmds.setAttr(str(IK_Controls[0][1][0])+".sx", lock=True, keyable=False, channelBox=False)
-	cmds.setAttr(str(IK_Controls[0][1][0])+".sy", lock=True, keyable=False, channelBox=False)
-	cmds.setAttr(str(IK_Controls[0][1][0])+".sz", lock=True, keyable=False, channelBox=False)
+	cmds.setAttr(str(IK_Controls[0][1][0]) + ".sx", lock=True, keyable=False, channelBox=False)
+	cmds.setAttr(str(IK_Controls[0][1][0]) + ".sy", lock=True, keyable=False, channelBox=False)
+	cmds.setAttr(str(IK_Controls[0][1][0]) + ".sz", lock=True, keyable=False, channelBox=False)
 
 	# locks and hides visibility channel for the IK gimbal control
 	cmds.setAttr(str(IK_Controls[0][1][0])+".visibility", lock=True, keyable=False, channelBox=False)
@@ -411,6 +434,7 @@ def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, F
 	cmds.parent(Stretchy[0], extrasName)
 	cmds.parent(Stretchy[1], extrasName)
 	cmds.parent(Stretchy[2], extrasName)
+	cmds.setAttr(str(extras) + ".visibility", 0)
 
 	mainGrpName = part + "_Grp"
 	cmds.group(em=True, name=mainGrpName)
@@ -419,13 +443,14 @@ def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, F
 	cmds.parent(extras, mainGrpName)
 
 
+
+
 def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	print "In Foot Setup"
-	print IK_Leg_Joints
 
 	# Create the IK handles
-	ballIK = cmds.ikHandle(n="ball_ikHandle", sj=IK_Leg_Joints[3], ee=IK_Leg_Joints[5], sol="ikRPsolver")
-	toeIK = cmds.ikHandle(n="toe_ikHandle", sj=IK_Leg_Joints[5], ee=IK_Leg_Joints[6], sol="ikRPsolver")
+	ballIK = cmds.ikHandle(n="ball_ikHandle", sj=IK_Leg_Joints[3], ee=IK_Leg_Joints[5], sol="ikSCsolver")
+	toeIK = cmds.ikHandle(n="toe_ikHandle", sj=IK_Leg_Joints[5], ee=IK_Leg_Joints[6], sol="ikSCsolver")
 
 
 	ballPivGrp = cmds.group(empty=True, name="BallPiv_Grp")
@@ -543,5 +568,37 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	cmds.setAttr(str(footmultdiv) + ".input2X", 6)
 	cmds.connectAttr(str(footmultdiv) + ".outputX", str(heelPivGrp) + ".ry")
 
-	### Foot Rock ###
-	
+
+	# Foot Rock #
+	footrockouterclamp = cmds.shadingNode('clamp', asUtility=True, name="FootRockOuter_Clamp")
+	cmds.setAttr(str(footrockouterclamp) + ".minR", 0)
+	cmds.setAttr(str(footrockouterclamp) + ".maxR", 10)
+	footrockoutermultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="FootRockOuter_MultDiv")
+	cmds.setAttr(str(footrockoutermultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".footRock", str(footrockouterclamp) + ".inputR")
+	cmds.connectAttr(str(footrockouterclamp) + ".outputR", str(footrockoutermultdiv) + ".input1X")
+	cmds.setAttr(str(footrockoutermultdiv) + ".input2X", -9)
+	cmds.connectAttr(str(footrockoutermultdiv) + ".outputX", str(FootRockOuterGrp) + ".rz")
+
+
+	# Foot Rock #
+	footrockinnerclamp = cmds.shadingNode('clamp', asUtility=True, name="FootRockInner_Clamp")
+	cmds.setAttr(str(footrockinnerclamp) + ".minR", -10)
+	cmds.setAttr(str(footrockinnerclamp) + ".maxR", 0)
+	footrockinnermultdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="FootRockInner_MultDiv")
+	cmds.setAttr(str(footrockinnermultdiv) + ".operation", 1)
+	cmds.connectAttr(IK_Controls[0][0][0] + ".footRock", str(footrockinnerclamp) + ".inputR")
+	cmds.connectAttr(str(footrockinnerclamp) + ".outputR", str(footrockinnermultdiv) + ".input1X")
+	cmds.setAttr(str(footrockinnermultdiv) + ".input2X", -9)
+	cmds.connectAttr(str(footrockinnermultdiv) + ".outputX", str(FootRockInnerGrp) + ".rz")
+
+
+
+
+
+
+
+
+
+
+

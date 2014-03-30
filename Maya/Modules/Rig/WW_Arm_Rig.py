@@ -22,6 +22,8 @@ class Arm_Rig:
 
 	def Arm_Lyt_Check(self, *args):
 		locatorInfo = []
+		armLocatorInfo = []
+		handLocatorInfo = []
 		rootLoc = cmds.ls(sl=True)
 		print rootLoc
 		print rootLoc[0]
@@ -32,31 +34,75 @@ class Arm_Rig:
 		if rootCheck == "root":
 			print "Root is selected"
 
+
 			rootChildren = cmds.listRelatives(rootLoc, allDescendents = True, type = "transform")
+			rootChildren.reverse()
 
 			for each in rootChildren:
 				pos = cmds.xform(each, q=True, ws=True, t=True)
 				locatorInfo.append([each, pos])
 
+			armLocatorInfo = locatorInfo[:3]
 
-			locatorInfo.reverse()
+			handLocatorInfo = locatorInfo[3:]
 
-			self.Arm_Rig(locatorInfo)
+
+			self.Arm_Rig(locatorInfo, armLocatorInfo, handLocatorInfo, rootLoc)
+
 
 		else:
 			return cmds.headsUpMessage("Please Select A Root")
 
 
 
-	def Arm_Rig(self, locatorInfo):
+	def Arm_Rig(self, locatorInfo, armLocatorInfo, handLocatorInfo, rootLoc):
 		part = "L_Arm"
 		PVtranslate = (0, 0, -10)
 		SwitchTranslate = (0, 5, 0)
 
 		# creates the Bind, FK, and IK joints
-		BIND_Arm_Joints = Joint_Utils.BuildJoints("BIND_", locatorInfo)
-		FK_Arm_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
-		IK_Arm_Joints = Joint_Utils.BuildJoints("IK_", locatorInfo)
+		BIND_Arm_Joints = Joint_Utils.BuildJoints("BIND_", armLocatorInfo)
+		FK_Arm_Joints = Joint_Utils.BuildJoints("FK_", armLocatorInfo)
+		IK_Arm_Joints = Joint_Utils.BuildJoints("IK_", armLocatorInfo)
+		Hand_Joints = Joint_Utils.BuildJoints("BIND_", handLocatorInfo)
+
+
+		cmds.delete(rootLoc)
+		cmds.parent("*hand*", BIND_Arm_Joints[len(BIND_Arm_Joints)-1])
+		cmds.parent("*thumb_01*", "*hand*")
+		cmds.parent("*index_01*", "*hand*")
+		cmds.parent("*middle_01*", "*hand*")
+		cmds.parent("*ring_01*", "*hand*")
+
+		thumbJoints = cmds.listRelatives("*thumb_01*", allDescendents=True)
+		
+		thumbJoints.reverse()
+		
+		thumbJoints.append("BIND_L_thumb_01_Jnt")
+		indexJoints = cmds.listRelatives("*index_01*", allDescendents=True)
+		
+		indexJoints.reverse()
+		middleJoints = cmds.listRelatives("*middle_01*", allDescendents=True)
+		
+		middleJoints.reverse()
+		ringJoints = cmds.listRelatives("*ring_01*", allDescendents=True)
+		
+		ringJoints.reverse()
+		pinkyJoints = cmds.listRelatives("*pinky_01*", allDescendents=True)
+		
+		pinkyJoints.reverse()
+
+		print thumbJoints
+		print indexJoints
+		print middleJoints
+		print ringJoints
+		print pinkyJoints
+
+
+
+		print Hand_Joints
+		print "Ciaran is a silly person"
+		
 
 		cmds.select(cl=True)
 
@@ -70,14 +116,14 @@ class Arm_Rig:
 		# constrains the FK and IK joints to the Bind joints
 		bindConstraints = Rig_Utils.constrainFKIK(BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints)	
 
-		# create stretchy IK
-		Stretchy = Rig_Utils.createStretchy(part, IK_Arm_Joints[0], IK_handle, IK_Arm_Joints[1], IK_Arm_Joints[2])
-
 		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
-		FK_Controls = Rig_Utils.createFKControls(part, FK_Arm_Joints)
+		FK_Controls = Rig_Utils.createFKControls(part, FK_Arm_Joints, Hand_Joints, BIND_Arm_Joints)
 		IK_Controls = Rig_Utils.createIKControls(part, path, IK_handle, PVpath, PVtranslate)
+
+		# create stretchy IK
+		Stretchy = Rig_Utils.createStretchy(part, IK_Arm_Joints[0], IK_handle, IK_Arm_Joints[1], IK_Arm_Joints[2], IK_Controls)
 
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"

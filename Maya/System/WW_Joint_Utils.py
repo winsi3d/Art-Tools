@@ -11,11 +11,14 @@ def BuildJoints(prefix, locatorInfo):
 	jointInfo = []
 
 	for each in locatorInfo:
-		jntName = prefix + each[0] + "_JNT"
+		jntName = prefix + each[0] + "_Jnt"
 		jnt = cmds.joint(n=jntName, p=each[1])
 		jointInfo.append(jnt)
 
-	for each in jointInfo:
-		cmds.joint( each, e=True, zso=True, oj='xyz', sao = 'yup' )
+		pc = cmds.parentConstraint(each[0], jnt)
+		cmds.delete(pc)
+
+		cmds.makeIdentity(jnt, apply=True, t=True, r=True, s=True, n=False)
+
 
 	return jointInfo
