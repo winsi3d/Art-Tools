@@ -7,6 +7,8 @@ Description: Creates an arm rig
 import maya.cmds as cmds
 import Maya.System.WW_Joint_Utils as Joint_Utils
 reload(Joint_Utils)
+import Maya.System.WW_Rig_Utils as Rig_Utils
+reload(Rig_Utils)
 
 
 CLASS_NAME = "Arm_Rig"
@@ -67,6 +69,7 @@ class Arm_Rig:
 		Hand_Joints = Joint_Utils.BuildJoints("BIND_", handLocatorInfo)
 
 
+
 		cmds.delete(rootLoc)
 		cmds.parent("*hand*", BIND_Arm_Joints[len(BIND_Arm_Joints)-1])
 		cmds.parent("*thumb_01*", "*hand*")
@@ -75,39 +78,30 @@ class Arm_Rig:
 		cmds.parent("*ring_01*", "*hand*")
 
 		thumbJoints = cmds.listRelatives("*thumb_01*", allDescendents=True)
-		
-		thumbJoints.reverse()
-		
 		thumbJoints.append("BIND_L_thumb_01_Jnt")
+		thumbJoints.reverse()
+
 		indexJoints = cmds.listRelatives("*index_01*", allDescendents=True)
-		
+		indexJoints.append("BIND_L_index_01_Jnt")
 		indexJoints.reverse()
+
 		middleJoints = cmds.listRelatives("*middle_01*", allDescendents=True)
-		
+		middleJoints.append("BIND_L_middle_01_Jnt")
 		middleJoints.reverse()
+
 		ringJoints = cmds.listRelatives("*ring_01*", allDescendents=True)
-		
+		ringJoints.append("BIND_L_ring_01_Jnt")
 		ringJoints.reverse()
+
 		pinkyJoints = cmds.listRelatives("*pinky_01*", allDescendents=True)
-		
+		pinkyJoints.append("BIND_L_pinky_01_Jnt")
 		pinkyJoints.reverse()
 
-		print thumbJoints
-		print indexJoints
-		print middleJoints
-		print ringJoints
-		print pinkyJoints
 
-
-
-		print Hand_Joints
-		print "Ciaran is a silly person"
-		
 
 		cmds.select(cl=True)
 
-		import Maya.System.WW_Rig_Utils as Rig_Utils
-		reload(Rig_Utils)
+
 
 
 		# creates the IK handle
@@ -119,7 +113,14 @@ class Arm_Rig:
 		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
-		FK_Controls = Rig_Utils.createFKControls(part, FK_Arm_Joints, Hand_Joints, BIND_Arm_Joints)
+		FK_Controls = Rig_Utils.createFKControls(part, FK_Arm_Joints)
+		
+		# create FK finger controls
+		fingersList = thumbJoints[0:3] + indexJoints[0:3] + middleJoints[0:3] + ringJoints[0:3] + pinkyJoints[0:3]
+		FingerControls = Rig_Utils.HandSetUp(path, fingersList, Hand_Joints)
+
+
+
 		IK_Controls = Rig_Utils.createIKControls(part, path, IK_handle, PVpath, PVtranslate)
 
 		# create stretchy IK

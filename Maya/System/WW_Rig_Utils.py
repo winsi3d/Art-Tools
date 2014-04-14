@@ -38,7 +38,7 @@ def constrainFKIK(BindJoints, FKJoints, IKJoints):
 	return bindConstraints
 
 
-def createFKControls(part, FK_Joints, FK_Hand_Joints, BIND_Arm_Joints):
+def createFKControls(part, FK_Joints):
 	print "In Create FK Controls"
 
 	# create circle controllers for the FK chain
@@ -91,17 +91,6 @@ def createFKControls(part, FK_Joints, FK_Hand_Joints, BIND_Arm_Joints):
 
 	handCtl = []
 	handCtlGrp = []
-
-	
-	#cmds.select("*pinky_01_CTRL_GRP", r=True)
-	#cmds.select("*ring_01_CTRL_GRP", add=True)
-	#cmds.select("*middle_01_CTRL_GRP", add=True)
-	#cmds.select("*index_01_CTRL_GRP", add=True)
-	#cmds.select("*thumb_01_CTRL_GRP", add=True)
-
-	#fingersConstraints = cmds.ls(sl=True)
-	#for each in fingersConstraints:
-	#	cmds.parentConstraint(BIND_Arm_Joints[len(BIND_Arm_Joints)-1], each)
 
 
 
@@ -283,7 +272,6 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
 	cmds.connectAttr(str(stretchyCnd) + ".outColorR", str(stretchybone1) + ".scaleX")
 
 	print IK_Controls
-	print "ROBOT UNICORN"
 
 	return startLoc, endLoc, distanceNode
 
@@ -593,12 +581,70 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	cmds.connectAttr(str(footrockinnermultdiv) + ".outputX", str(FootRockInnerGrp) + ".rz")
 
 
+def HandSetUp(path, fingerControls, Hand_Joints):
+	print "In Hand Set Up"
+
+	# create circle controllers for the FK chain
+	fingerCtrl = []
+	fingerCtrlGrp = []
+	fingerCtrlSDKGrp = []
+
+	x = 0
+
+
+	for eachJoint in fingerControls:
+
+		# set the name here
+		FKname = str(fingerControls[x])[5:len(fingerControls[x])-4]
+
+		# create the controller
+		fingerCtrl.append(cmds.circle(sections=8, ch=False, n=FKname + "_CTRL"))
+		
+		# rotates the joint 90 degrees in y and freeze transformations
+		cmds.xform(r=True, ro=(0, 90, 0), s=(0.5, 0.5, 0.5))
+		cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
+
+		# groups the controller to itself, and renames
+		fingerCtrlSDKGrp.append(cmds.group(n=FKname + "_CTRL_Grp"))
+		fingerCtrlGrp.append(cmds.group(n=FKname + "_zero_rg"))
+
+		#parent constrains the group to the joint to place it in the correct place, and deletes the constraint
+		fk_pctemp = cmds.parentConstraint(fingerControls[x], fingerCtrlGrp[x], mo = False)
+		cmds.delete(fk_pctemp)
+
+		# orient constrains the joint to the controller
+		cmds.orientConstraint(fingerCtrl[x], fingerControls[x], mo = True)
+
+
+		x += 1
 
 
 
 
+	y = 0
 
 
+	# parents the controls and groups up the hierarchy
+
+	for eachGroup in fingerCtrlGrp:
+		cmds.parent(fingerCtrlGrp[y+1], fingerCtrl[y])
+		y += 1
+		if y == len(fingerCtrlGrp)-1:
+			break
 
 
+	cmds.select(cl=True)
 
+	fingerGrpName = fingerCtrlGrp[0].partition("_")[0] + "_Fingers_zero_rg"
+	
+
+	cmds.select(fingerCtrlGrp[0], r=True)
+	cmds.select(fingerCtrlGrp[3], add=True)
+	cmds.select(fingerCtrlGrp[6], add=True)
+	cmds.select(fingerCtrlGrp[9], add=True)
+	cmds.select(fingerCtrlGrp[12], add=True)
+
+	fingerGrp = cmds.group(n=fingerGrpName)
+
+
+	cmds.parentConstraint(Hand_Joints, fingerGrp)
