@@ -14,12 +14,11 @@ HandLocatorPos = ([7.5, 15.0, 0.0], [7.55, 15, .589], [7.772, 15, 0.966], [7.793
 
 # Leg Locators
 LegLocatorNames = ["leg_root", "pelvis", "hip", "knee", "ankle", "heel", "ball", "toe_End"]
-LegLocatorPos = ([-0.06, 11.0, 0], [-0.06, 10.4, 0], [1.25, 9.8, 0], [1.25, 5.6, 0.15], [1.25, 1.50, -0.3], [1.25, 0.28, -1.00],[1.25, 0.28, 0.9], [1.25, 0.28, 1.9] )
+LegLocatorPos = ([-0.06, 10.0, 0], [-0.06, 10.4, 0], [1.25, 9.8, 0], [1.25, 5.6, 0.15], [1.25, 1.50, -0.3], [1.25, 0.28, -1.00],[1.25, 0.28, 0.9], [1.25, 0.28, 1.9] )
 
 FootRockLocNames = ["outer_foot_loc", "inner_foot_loc"]
 FootRockPos = ([2, 0, 0], [0.5, 0, 0])
 
-"""
 # Spine Locators
-SpineLocatorNames = ["root", "spine_01, spine_02, spine_03"]
-"""
+SpineLocatorNames = ["spine_root", "root", "spine_01", "spine_02", "spine_03", "spine_End"]
+SpineLocatorPos = ([0, 10.5, -0.27], [0, 11, -0.27], [0, 12, -0.27], [0, 13, -0.27], [0, 14, -0.27], [0, 15.5, -0.27])

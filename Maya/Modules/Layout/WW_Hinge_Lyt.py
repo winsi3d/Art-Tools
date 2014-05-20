@@ -35,6 +35,9 @@ class Hinge_Lyt:
 		FootRockLocNames = Lyt_Utils.FootRockLocNames
 		FootRockPos = Lyt_Utils.FootRockPos
 
+		SpineLocNames = Lyt_Utils.SpineLocatorNames
+		SpineLocPos = Lyt_Utils.SpineLocatorPos
+
 
 
 
@@ -43,6 +46,7 @@ class Hinge_Lyt:
 		hand_loc_list = []
 		leg_loc_list = []
 		foot_loc_list = []
+		spine_loc_list = []
 
 		
 		arm_root_loc = cmds.spaceLocator(n="L+" + ArmLocNames[0])
@@ -114,3 +118,24 @@ class Hinge_Lyt:
 			cmds.parentConstraint(leg_loc_list[len(leg_loc_list)-2], foot_loc_list[1], mo=True)
 
 		cmds.select(cl=True)
+
+
+
+
+		spine_root_loc = cmds.spaceLocator(n=SpineLocNames[0])
+		cmds.xform(cp=True)
+		cmds.xform(t=SpineLocPos[0])
+
+		cmds.select(cl=True)
+		
+
+		x = 1
+
+		for each in SpineLocNames[1:]:
+			spine_loc_list.append(cmds.joint(n="L_"+each, a=True, p=SpineLocPos[x]))
+			x += 1
+
+		for each in spine_loc_list:
+			cmds.joint( each, e=True, zso=True, oj='xyz', sao = 'yup' )
+
+		cmds.parent(spine_loc_list[0], spine_root_loc)
