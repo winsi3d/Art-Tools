@@ -648,3 +648,86 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 
 
 	cmds.parentConstraint(Hand_Joints, fingerGrp)
+
+
+def SpineSetUp(BIND_Spine_Joints):
+
+	JntPos = []
+	x = 0
+	for each in BIND_Spine_Joints:
+		JntPos.append(cmds.xform(BIND_Spine_Joints[x], q=True, translation=True))
+		x += 1
+
+	RibbonLen = JntPos[0][0] + JntPos[1][0] + JntPos[2][0] + JntPos[3][0] + JntPos[4][0]
+
+	print RibbonLen
+
+	# Create group for ribbon rig
+	ribbonRigGrp = cmds.group(em=True, n=("Ribbon_Spine_Grp"))
+	
+	# Create nurbs plane
+	ribbonPlane = cmds.nurbsPlane (n=("Ribbon_Spine_Plane"), p=[0, 0, 0], ax= [0, 0 ,1], w=1 ,lr=RibbonLen ,d=3, u=1, v=5, ch=0)
+
+	pc = cmds.pointConstraint(BIND_Spine_Joints[2], ribbonPlane, mo=False)
+	cmds.delete(pc)
+	
+	# Get the shape node
+	ribbonPlaneShape = cmds.listRelatives(ribbonPlane, c=True, s=True)
+	print ribbonPlane
+	print ribbonPlaneShape[0]
+
+	folList = []
+
+	#Create a list for the follicles
+	spineList = [BIND_Spine_Joints[0], BIND_Spine_Joints[1], BIND_Spine_Joints[2], BIND_Spine_Joints[3], BIND_Spine_Joints[4]]
+
+	for each in spineList:
+		follicle = cmds.createNode("follicle", n=each + "_follicleShape")
+		follicleTransform = cmds.listRelatives(follicle, p=True)
+
+		print follicle
+		print follicleTransform
+		
+		cmds.connectAttr(ribbonPlaneShape[0] + ".local", "BIND_L_cog_Jnt_follicleShape.inputSurface")
+		cmds.connectAttr(ribbonPlaneShape[0] + ".worldMatrix[0]", "BIND_L_cog_Jnt_follicleShape.inputWorldMatrix")
+		cmds.connectAttr("BIND_L_cog_Jnt_follicleShape.outRotate", "BIND_L_cog_Jnt_follicle.rotate")
+		cmds.connectAttr("BIND_L_cog_Jnt_follicleShape.outTranslate", "BIND_L_cog_Jnt_follicle.translate")
+
+
+		##position the follicles along the plane
+		cmds.setAttr("BIND_L_cog_Jnt_follicleShape.parameterU", 0.5)
+		vSpanHeight = ((each+1.0)/5.0) - .1
+		cmds.setAttr("BIND_L_cog_Jnt_follicleShape.parameterV", vSpanHeight)
+
+
+
+	"""
+    ##Create the follicles and ribbon joints
+    for f in range(5):
+        follicle = mc.createNode('follicle', n="")
+        print follicle
+        follicleTransform = mc.listRelatives(follicle,  p=True) #get transform node
+ 
+        ribbonJnt = mc.joint(n='{prefix}_{suffix}_jnt_{f}'.format(prefix=prefix,suffix=suffix,f=f+1))#create joint
+        grp=mc.group(n=(ribbonJnt+'_offsetGrp'))#grp joint
+ 
+        ## connect folliclesShapes to the plane
+        mc.connectAttr(('{ribbonPlaneShape}.local'.format(ribbonPlaneShape=ribbonPlaneShape[0])) ,('{follicle}.inputSurface'.format(follicle=follicle)))
+        mc.connectAttr(('{ribbonPlaneShape}.worldMatrix[0]'.format(ribbonPlaneShape=ribbonPlaneShape[0])) ,('{follicle}.inputWorldMatrix'.format(follicle=follicle)))
+        ## connect follicleShapes to follicleTransform
+        mc.connectAttr((follicle+'.outTranslate'), (follicleTransform[0]+'.translate') )
+        mc.connectAttr((follicle+'.outRotate'), (follicleTransform[0]+'.rotate') )
+ 
+        ##position the follicles along the plane
+        mc.setAttr((follicle+'.parameterU'), 0.5)
+        vSpanHeight = ((f+1.0)/5.0) - .1
+        mc.setAttr((follicle+'.parameterV'), vSpanHeight)
+         
+        #Turn off inherit transforms on the follicles
+        mc.setAttr('{follicleTransform}.inheritsTransform'.format(follicleTransform=follicleTransform[0]),0, lock=True)
+         
+        ##parent the follicle to the group and add to lists
+        mc.parent(follicleTransform[0], folGroup)
+        folList.append(follicle)
+       """
+         

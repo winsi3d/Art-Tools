@@ -20,5 +20,5 @@ FootRockLocNames = ["outer_foot_loc", "inner_foot_loc"]
 FootRockPos = ([2, 0, 0], [0.5, 0, 0])
 
 # Spine Locators
-SpineLocatorNames = ["spine_root", "root", "spine_01", "spine_02", "spine_03", "spine_End"]
-SpineLocatorPos = ([0, 10.5, -0.27], [0, 11, -0.27], [0, 12, -0.27], [0, 13, -0.27], [0, 14, -0.27], [0, 15.5, -0.27])
+SpineLocatorNames = ["spine_root", "cog", "spine_01", "spine_02", "spine_03", "chest", "neck", "head", "head_End"]
+SpineLocatorPos = ([0, 10.5, 0], [0, 11.25, 0], [0, 12.0, 0], [0, 12.75, 0], [0, 13.5, 0], [0, 14.25, 0], [0, 15.5, 0], [0, 16, 0], [0, 18, 0])

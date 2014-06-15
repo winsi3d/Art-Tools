@@ -66,8 +66,11 @@ class Spine_Rig:
 
 		cmds.select(cl=True)
 
+
 		import Maya.System.WW_Rig_Utils as Rig_Utils
 		reload(Rig_Utils)
+
+		Rig_Utils.SpineSetUp(BIND_Spine_Joints)
 
 
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
