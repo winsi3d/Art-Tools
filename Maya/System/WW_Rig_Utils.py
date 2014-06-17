@@ -667,6 +667,7 @@ def SpineSetUp(BIND_Spine_Joints):
 	
 	# Create nurbs plane
 	ribbonPlane = cmds.nurbsPlane (n=("Ribbon_Spine_Plane"), p=[0, 0, 0], ax= [0, 0 ,1], w=1 ,lr=RibbonLen ,d=3, u=1, v=5, ch=0)
+	cmds.parent(ribbonPlane, ribbonRigGrp)
 
 	pc = cmds.pointConstraint(BIND_Spine_Joints[2], ribbonPlane, mo=False)
 	cmds.delete(pc)
@@ -677,6 +678,9 @@ def SpineSetUp(BIND_Spine_Joints):
 	print ribbonPlaneShape[0]
 
 	folList = []
+	x=0
+
+	#folGrp = cmds.group(n="Spine_Follicles_Grp")
 
 	#Create a list for the follicles
 	spineList = [BIND_Spine_Joints[0], BIND_Spine_Joints[1], BIND_Spine_Joints[2], BIND_Spine_Joints[3], BIND_Spine_Joints[4]]
@@ -688,17 +692,22 @@ def SpineSetUp(BIND_Spine_Joints):
 		print follicle
 		print follicleTransform
 		
-		cmds.connectAttr(ribbonPlaneShape[0] + ".local", "BIND_L_cog_Jnt_follicleShape.inputSurface")
-		cmds.connectAttr(ribbonPlaneShape[0] + ".worldMatrix[0]", "BIND_L_cog_Jnt_follicleShape.inputWorldMatrix")
-		cmds.connectAttr("BIND_L_cog_Jnt_follicleShape.outRotate", "BIND_L_cog_Jnt_follicle.rotate")
-		cmds.connectAttr("BIND_L_cog_Jnt_follicleShape.outTranslate", "BIND_L_cog_Jnt_follicle.translate")
+		cmds.connectAttr(ribbonPlaneShape[0] + ".local", follicle + ".inputSurface")
+		cmds.connectAttr(ribbonPlaneShape[0] + ".worldMatrix[0]", follicle + ".inputWorldMatrix")
+		cmds.connectAttr(follicle + ".outRotate", follicleTransform[0] + ".rotate")
+		cmds.connectAttr(follicle + ".outTranslate", follicleTransform[0] + ".translate")
 
 
-		##position the follicles along the plane
-		cmds.setAttr("BIND_L_cog_Jnt_follicleShape.parameterU", 0.5)
-		vSpanHeight = ((each+1.0)/5.0) - .1
-		cmds.setAttr("BIND_L_cog_Jnt_follicleShape.parameterV", vSpanHeight)
+		#position the follicles along the plane
+		cmds.setAttr(follicle + ".parameterU", 0.5)
+		vSpanHeight = ((x+1.0)/5.0) - .1
+		cmds.setAttr(follicle + ".parameterV", vSpanHeight)
 
+		x+=1
+
+        #parent the follicle to the group and add to lists
+        #cmds.parent(follicleTransform[0], folGroup)
+        #folList.append(follicle)
 
 
 	"""
