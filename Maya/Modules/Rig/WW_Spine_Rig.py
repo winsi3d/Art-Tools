@@ -70,9 +70,8 @@ class Spine_Rig:
 		import Maya.System.WW_Rig_Utils as Rig_Utils
 		reload(Rig_Utils)
 
-		Rig_Utils.SpineSetUp(BIND_Spine_Joints)
-
-
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
-		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
+
+		Rig_Utils.SpineSetUp(BIND_Spine_Joints, path)
+
 		FK_Controls = Rig_Utils.createFKControls(part, FK_Spine_Joints)

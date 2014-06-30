@@ -650,7 +650,7 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 	cmds.parentConstraint(Hand_Joints, fingerGrp)
 
 
-def SpineSetUp(BIND_Spine_Joints):
+def SpineSetUp(BIND_Spine_Joints, path):
 
 	JntPos = []
 	x = 0
@@ -664,9 +664,15 @@ def SpineSetUp(BIND_Spine_Joints):
 
 	# Create group for ribbon rig
 	ribbonRigGrp = cmds.group(em=True, n=("Ribbon_Spine_Grp"))
+
+	# Create group for follicles
+	folGrp = cmds.group(em=True, n="Spine_Follicles_Grp")
+
 	
 	# Create nurbs plane
 	ribbonPlane = cmds.nurbsPlane (n=("Ribbon_Spine_Plane"), p=[0, 0, 0], ax= [0, 0 ,1], w=1 ,lr=RibbonLen ,d=3, u=1, v=5, ch=0)
+	cmds.rebuildSurface(rebuildType=0, direction=0, spansU=1, spansV=5, degreeU=1, degreeV=3, keepRange=0)
+
 	cmds.parent(ribbonPlane, ribbonRigGrp)
 
 	pc = cmds.pointConstraint(BIND_Spine_Joints[2], ribbonPlane, mo=False)
@@ -674,69 +680,147 @@ def SpineSetUp(BIND_Spine_Joints):
 	
 	# Get the shape node
 	ribbonPlaneShape = cmds.listRelatives(ribbonPlane, c=True, s=True)
-	print ribbonPlane
-	print ribbonPlaneShape[0]
+
 
 	folList = []
 	x=0
 
-	#folGrp = cmds.group(n="Spine_Follicles_Grp")
-
-	#Create a list for the follicles
+	# Create a list for the follicles
 	spineList = [BIND_Spine_Joints[0], BIND_Spine_Joints[1], BIND_Spine_Joints[2], BIND_Spine_Joints[3], BIND_Spine_Joints[4]]
 
+	# Creates a follicle for each of the spine joints
 	for each in spineList:
 		follicle = cmds.createNode("follicle", n=each + "_follicleShape")
 		follicleTransform = cmds.listRelatives(follicle, p=True)
-
-		print follicle
-		print follicleTransform
 		
 		cmds.connectAttr(ribbonPlaneShape[0] + ".local", follicle + ".inputSurface")
 		cmds.connectAttr(ribbonPlaneShape[0] + ".worldMatrix[0]", follicle + ".inputWorldMatrix")
 		cmds.connectAttr(follicle + ".outRotate", follicleTransform[0] + ".rotate")
 		cmds.connectAttr(follicle + ".outTranslate", follicleTransform[0] + ".translate")
 
-
 		#position the follicles along the plane
 		cmds.setAttr(follicle + ".parameterU", 0.5)
 		vSpanHeight = ((x+1.0)/5.0) - .1
 		cmds.setAttr(follicle + ".parameterV", vSpanHeight)
 
+		cmds.parent(follicleTransform[0], folGrp)
+		folList.append(follicle)
+
 		x+=1
 
-        #parent the follicle to the group and add to lists
-        #cmds.parent(follicleTransform[0], folGroup)
-        #folList.append(follicle)
+
+	
+	cmds.select(cl=True)
 
 
-	"""
-    ##Create the follicles and ribbon joints
-    for f in range(5):
-        follicle = mc.createNode('follicle', n="")
-        print follicle
-        follicleTransform = mc.listRelatives(follicle,  p=True) #get transform node
- 
-        ribbonJnt = mc.joint(n='{prefix}_{suffix}_jnt_{f}'.format(prefix=prefix,suffix=suffix,f=f+1))#create joint
-        grp=mc.group(n=(ribbonJnt+'_offsetGrp'))#grp joint
- 
-        ## connect folliclesShapes to the plane
-        mc.connectAttr(('{ribbonPlaneShape}.local'.format(ribbonPlaneShape=ribbonPlaneShape[0])) ,('{follicle}.inputSurface'.format(follicle=follicle)))
-        mc.connectAttr(('{ribbonPlaneShape}.worldMatrix[0]'.format(ribbonPlaneShape=ribbonPlaneShape[0])) ,('{follicle}.inputWorldMatrix'.format(follicle=follicle)))
-        ## connect follicleShapes to follicleTransform
-        mc.connectAttr((follicle+'.outTranslate'), (follicleTransform[0]+'.translate') )
-        mc.connectAttr((follicle+'.outRotate'), (follicleTransform[0]+'.rotate') )
- 
-        ##position the follicles along the plane
-        mc.setAttr((follicle+'.parameterU'), 0.5)
-        vSpanHeight = ((f+1.0)/5.0) - .1
-        mc.setAttr((follicle+'.parameterV'), vSpanHeight)
-         
-        #Turn off inherit transforms on the follicles
-        mc.setAttr('{follicleTransform}.inheritsTransform'.format(follicleTransform=follicleTransform[0]),0, lock=True)
-         
-        ##parent the follicle to the group and add to lists
-        mc.parent(follicleTransform[0], folGroup)
-        folList.append(follicle)
-       """
-         
+	# Creates controls to drive the joints
+	# import the cube controls and circle control, rename, and add it to Ctl list
+	Ctl = []
+	CtlGrp = []
+
+	cmds.file(path, i=True)
+	cmds.select("curve1", r=True)
+	cmds.rename("Hips_CTRL")
+	Ctl.append(cmds.ls(sl=True))
+	cmds.group(n="Hips_CTRL_zero_rg")
+	CtlGrp.append(cmds.ls(sl=True))
+
+	cmds.circle(n="Midriff_CTRL")
+	cmds.setAttr("Midriff_CTRL.rotateY", 90)
+	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
+
+	Ctl.append(cmds.ls(sl=True))
+	cmds.group(n="Midriff_CTRL_zero_rg")
+	CtlGrp.append(cmds.ls(sl=True))
+
+	cmds.file(path, i=True)
+	cmds.select("curve1", r=True)
+	cmds.rename("Chest_CTRL")
+	Ctl.append(cmds.ls(sl=True))
+	cmds.group(n="Chest_CTRL_zero_rg")
+	CtlGrp.append(cmds.ls(sl=True))
+
+
+
+	# Creates locators to be used as aim constraints
+	locHipAim = cmds.spaceLocator(n="HipsAim_LOC")
+	cmds.parent(locHipAim, Ctl[0][0])
+	locHipUp = cmds.spaceLocator(n="HipsUp_LOC")
+	cmds.xform(locHipUp, translation=(0, -1, 0))
+	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
+	cmds.parent(locHipUp, Ctl[0][0])
+
+	locMidAim = cmds.spaceLocator(n="MidriffAim_LOC")
+	cmds.parent(locMidAim, Ctl[1][0])
+	locMidUp = cmds.spaceLocator(n="MidriffUp_LOC")
+	cmds.xform(locMidUp, translation=(0, -1, 0))
+	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
+	cmds.parent(locMidUp, Ctl[1][0])
+
+	locChestAim = cmds.spaceLocator(n="ChestAim_LOC")
+	cmds.parent(locChestAim, Ctl[2][0])
+	locChestUp = cmds.spaceLocator(n="ChestUp_LOC")
+	cmds.xform(locChestUp, translation=(0, -1, 0))
+	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
+	cmds.parent(locChestUp, Ctl[2][0])
+
+
+
+	# Place the ribbon spine controls
+	pc = cmds.parentConstraint(spineList[0], CtlGrp[0][0], mo=False)
+	cmds.delete(pc)
+
+	pc = cmds.parentConstraint(spineList[2], CtlGrp[1][0], mo=False)
+	cmds.delete(pc)
+
+	pc = cmds.parentConstraint(spineList[4], CtlGrp[2][0], mo=False)
+	cmds.delete(pc)
+
+	cmds.select(cl=True)
+
+
+	DriveJnts = []
+
+	# Create the driver for the ribbon spine rig
+	TopDrv1 = cmds.joint(n="topDriver_01_rgJnt")
+	DriveJnts.append(cmds.ls(sl=True))
+	pc = cmds.pointConstraint(spineList[4], TopDrv1, mo=False)
+	cmds.delete(pc)
+
+	TopDrv2 = cmds.joint(n="topDriver_02_rgJnt")
+	DriveJnts.append(cmds.ls(sl=True))
+	pc = cmds.pointConstraint(spineList[3], TopDrv2, mo=False)
+	cmds.delete(pc)
+	
+
+	cmds.select(cl=True)
+
+	BotDrv1 = cmds.joint(n="bottomDriver_01_rgJnt")
+	DriveJnts.append(cmds.ls(sl=True))
+	pc = cmds.pointConstraint(spineList[0], BotDrv1, mo=False)
+	cmds.delete(pc)
+
+	BotDrv2 = cmds.joint(n="bottomDriver_02_rgJnt")
+	DriveJnts.append(cmds.ls(sl=True))
+	pc = cmds.pointConstraint(spineList[1], BotDrv2, mo=False)
+	cmds.delete(pc)
+
+	cmds.select(cl=True)
+	
+	MidDrv = cmds.joint(n="midDriver_rgJnt")
+	DriveJnts.append(cmds.ls(sl=True))
+	pc = cmds.pointConstraint(spineList[2], MidDrv, mo=False)
+	cmds.delete(pc)
+
+
+	for each in DriveJnts:
+		print each[0]
+		cmds.joint( each[0], e=True, zso=True, oj='xyz', sao = 'yup' )
+
+	cmds.setAttr(str(DriveJnts[1][0])+".jointOrientZ", 0)
+	cmds.setAttr(str(DriveJnts[3][0])+".jointOrientZ", 0)
+	cmds.setAttr(str(DriveJnts[4][0])+".jointOrientZ", 90)
+
+	cmds.parent(TopDrv1, locChestAim)
+	cmds.parent(BotDrv1, locHipAim)
+	cmds.parent(MidDrv, locMidAim)
