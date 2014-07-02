@@ -60,7 +60,6 @@ class Spine_Rig:
 		# creates the Bind, FK, and IK joints
 		BIND_Spine_Joints = Joint_Utils.BuildJoints("BIND_", locatorInfo)
 		FK_Spine_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
-		IK_Spine_Joints = Joint_Utils.BuildJoints("IK_", locatorInfo)
 
 		cmds.delete(rootLoc)
 

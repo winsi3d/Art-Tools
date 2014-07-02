@@ -132,7 +132,7 @@ class Hinge_Lyt:
 		x = 1
 
 		for each in SpineLocNames[1:]:
-			spine_loc_list.append(cmds.joint(n="L_"+each, a=True, p=SpineLocPos[x]))
+			spine_loc_list.append(cmds.joint(n=each, a=True, p=SpineLocPos[x]))
 			x += 1
 
 		for each in spine_loc_list:

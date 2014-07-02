@@ -7,6 +7,8 @@ Description: Builds Rig
 import maya.cmds as cmds
 import Maya.Modules.Layout.WW_Hinge_Lyt as Hinge_Lyt
 reload(Hinge_Lyt)
+import Maya.System.WW_Joint_Utils as Joint_Utils
+reload(Joint_Utils)
 
 
 def createIK(part, IKstartJoint, IKendJoint):
@@ -651,6 +653,7 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 
 
 def SpineSetUp(BIND_Spine_Joints, path):
+	print "In Spine Set Up using a ribbon spine"
 
 	JntPos = []
 	x = 0
@@ -659,8 +662,8 @@ def SpineSetUp(BIND_Spine_Joints, path):
 		x += 1
 
 	RibbonLen = JntPos[0][0] + JntPos[1][0] + JntPos[2][0] + JntPos[3][0] + JntPos[4][0]
+	RibbonLen = RibbonLen + (RibbonLen/5)
 
-	print RibbonLen
 
 	# Create group for ribbon rig
 	ribbonRigGrp = cmds.group(em=True, n=("Ribbon_Spine_Grp"))
@@ -683,12 +686,15 @@ def SpineSetUp(BIND_Spine_Joints, path):
 
 
 	folList = []
+	IK_Spine_Joints = []
 	x=0
 
 	# Create a list for the follicles
 	spineList = [BIND_Spine_Joints[0], BIND_Spine_Joints[1], BIND_Spine_Joints[2], BIND_Spine_Joints[3], BIND_Spine_Joints[4]]
 
+
 	# Creates a follicle for each of the spine joints
+	# Creates a joint for each follicle and parents it under the follicles
 	for each in spineList:
 		follicle = cmds.createNode("follicle", n=each + "_follicleShape")
 		follicleTransform = cmds.listRelatives(follicle, p=True)
@@ -706,11 +712,23 @@ def SpineSetUp(BIND_Spine_Joints, path):
 		cmds.parent(follicleTransform[0], folGrp)
 		folList.append(follicle)
 
-		x+=1
 
+		jntName = "IK_" + str(each).partition("_")[2]
+		jnt = cmds.joint(n=jntName)
+		pc = cmds.parentConstraint(follicle, jnt)
+		cmds.delete(pc)
+
+		cmds.makeIdentity(jnt, apply=True, t=True, r=True, s=True, n=False)
+
+		cmds.setAttr(str(jnt)+".jointOrientZ", 90)
+
+		IK_Spine_Joints.append(cmds.ls(sl=True))
+
+		x+=1
 
 	
 	cmds.select(cl=True)
+
 
 
 	# Creates controls to drive the joints
@@ -824,3 +842,20 @@ def SpineSetUp(BIND_Spine_Joints, path):
 	cmds.parent(TopDrv1, locChestAim)
 	cmds.parent(BotDrv1, locHipAim)
 	cmds.parent(MidDrv, locMidAim)
+
+	
+	# Create aim constraints
+	cmds.aimConstraint( Ctl[2][0], locHipAim, aimVector=(0.0, 1.0, 0.0), upVector=(1.0, 0.0, 0.0), worldUpType="object", worldUpObject=locHipUp[0], mo=True )
+	cmds.aimConstraint( Ctl[0][0], locChestAim, aimVector=(0.0, -1.0, 0.0), upVector=(1.0, 0.0, 0.0), worldUpType="object", worldUpObject=locChestUp[0], mo=True )
+
+	# Create point constraint
+	cmds.pointConstraint(Ctl[2][0], Ctl[0][0], CtlGrp[1][0])
+
+	# Aim the middle control to the top control
+	cmds.aimConstraint(Ctl[2][0], locMidAim, aimVector=(0.0, 1.0, 0.0), upVector=(1.0, 0.0, 0.0), worldUpType="object", worldUpObject=locMidUp[0] )
+
+
+	# Bind joints
+	cmds.skinCluster( ribbonPlane, TopDrv1, BotDrv1, MidDrv )
+
+
