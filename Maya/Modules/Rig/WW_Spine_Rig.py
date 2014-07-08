@@ -45,6 +45,7 @@ class Spine_Rig:
 
 
 			locatorInfo.reverse()
+			locatorInfo.pop()
 
 			self.Spine_Rig(locatorInfo, rootLoc)
 
@@ -71,6 +72,6 @@ class Spine_Rig:
 
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 
-		Rig_Utils.SpineSetUp(BIND_Spine_Joints, path)
+		Rig_Utils.SpineSetUp(BIND_Spine_Joints, path, FK_Spine_Joints)
 
 		FK_Controls = Rig_Utils.createFKControls(part, FK_Spine_Joints)

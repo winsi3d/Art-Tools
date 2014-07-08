@@ -652,7 +652,7 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 	cmds.parentConstraint(Hand_Joints, fingerGrp)
 
 
-def SpineSetUp(BIND_Spine_Joints, path):
+def SpineSetUp(BIND_Spine_Joints, path, FK_Spine_Joints):
 	print "In Spine Set Up using a ribbon spine"
 
 	JntPos = []
@@ -857,5 +857,22 @@ def SpineSetUp(BIND_Spine_Joints, path):
 
 	# Bind joints
 	cmds.skinCluster( ribbonPlane, TopDrv1, BotDrv1, MidDrv )
+
+
+	# Spine Cleanup
+	# constrain the IK and FK joint chains to the BIND chain
+	x = 0
+	bindConstraints = []
+	for eachJoint in BIND_Spine_Joints:
+		bindConstraints.append(cmds.parentConstraint(FK_Spine_Joints[x], IK_Spine_Joints[x], BIND_Spine_Joints[x], mo=True))
+		x += 1
+
+	# hides the FK and IK arm joints
+	cmds.setAttr(str(FK_Spine_Joints[0]) + ".visibility", False)
+	
+	for each in IK_Spine_Joints:
+		cmds.setAttr(str(each[0]) + ".visibility", False)
+
+
 
 
