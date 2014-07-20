@@ -44,12 +44,13 @@ class Arm_Rig:
 				pos = cmds.xform(each, q=True, ws=True, t=True)
 				locatorInfo.append([each, pos])
 
-			armLocatorInfo = locatorInfo[:3]
+			clavArmLocatorInfo = locatorInfo[0:4]
+			armLocatorInfo = locatorInfo[1:4]
 
-			handLocatorInfo = locatorInfo[3:]
+			handLocatorInfo = locatorInfo[4:]
 
 
-			self.Arm_Rig(locatorInfo, armLocatorInfo, handLocatorInfo, rootLoc)
+			self.Arm_Rig(locatorInfo, clavArmLocatorInfo, armLocatorInfo, handLocatorInfo, rootLoc)
 
 
 		else:
@@ -57,46 +58,62 @@ class Arm_Rig:
 
 
 
-	def Arm_Rig(self, locatorInfo, armLocatorInfo, handLocatorInfo, rootLoc):
-		part = "L_Arm"
+	def Arm_Rig(self, locatorInfo, clavArmLocatorInfo, armLocatorInfo, handLocatorInfo, rootLoc):
+		part = "Arm"
+		Lside = "L_"
+		Rside = "R_"
+		skin = "_skJnt"
+		rg = "_rgJnt"
+		typeIk = "IK_"
+		typeFk = "FK_"
+		typeNone = ""
+
 		PVtranslate = (0, 0, -10)
-		SwitchTranslate = (0, 5, 0)
+		SwitchTranslate = (0, 1, 0)
 
+
+
+		"""
+		
+		----------------------------------------
+		This creates the joints on the left side
+		----------------------------------------
+		
+		"""
+		
 		# creates the Bind, FK, and IK joints
-		BIND_Arm_Joints = Joint_Utils.BuildJoints("BIND_", armLocatorInfo)
-		FK_Arm_Joints = Joint_Utils.BuildJoints("FK_", armLocatorInfo)
-		IK_Arm_Joints = Joint_Utils.BuildJoints("IK_", armLocatorInfo)
-		Hand_Joints = Joint_Utils.BuildJoints("BIND_", handLocatorInfo)
+		L_BIND_Arm_Joints = Joint_Utils.BuildJoints(Lside, typeNone, clavArmLocatorInfo, skin)
+		L_FK_Arm_Joints = Joint_Utils.BuildJoints(Lside, typeFk, armLocatorInfo, rg)
+		L_IK_Arm_Joints = Joint_Utils.BuildJoints(Lside, typeIk, armLocatorInfo, rg)
+		L_Hand_Joints = Joint_Utils.BuildJoints(Lside, typeNone, handLocatorInfo, skin)
 
-
-
+		# parents the finger joints to the hand joint
 		cmds.delete(rootLoc)
-		cmds.parent("*hand*", BIND_Arm_Joints[len(BIND_Arm_Joints)-1])
-		cmds.parent("*thumb_01*", "*hand*")
-		cmds.parent("*index_01*", "*hand*")
-		cmds.parent("*middle_01*", "*hand*")
-		cmds.parent("*ring_01*", "*hand*")
+		cmds.parent(Lside + "hand" + skin, L_BIND_Arm_Joints[len(L_BIND_Arm_Joints)-1])
+		cmds.parent(Lside + "thumb_01" + skin, Lside + "*hand" + skin)
+		cmds.parent(Lside + "index_01" + skin, Lside + "hand" + skin)
+		cmds.parent(Lside + "middle_01" + skin, Lside + "hand" + skin)
+		cmds.parent(Lside + "ring_01" + skin, Lside + "hand" + skin)
 
-		thumbJoints = cmds.listRelatives("*thumb_01*", allDescendents=True)
-		thumbJoints.append("BIND_L_thumb_01_Jnt")
-		thumbJoints.reverse()
+		L_thumbJoints = cmds.listRelatives(Lside + "thumb_01" + skin, allDescendents=True)
+		L_thumbJoints.append(Lside + "thumb_01" + skin)
+		L_thumbJoints.reverse()
 
-		indexJoints = cmds.listRelatives("*index_01*", allDescendents=True)
-		indexJoints.append("BIND_L_index_01_Jnt")
-		indexJoints.reverse()
+		L_indexJoints = cmds.listRelatives(Lside + "index_01" + skin, allDescendents=True)
+		L_indexJoints.append(Lside + "index_01" + skin)
+		L_indexJoints.reverse()
 
-		middleJoints = cmds.listRelatives("*middle_01*", allDescendents=True)
-		middleJoints.append("BIND_L_middle_01_Jnt")
-		middleJoints.reverse()
+		L_middleJoints = cmds.listRelatives(Lside + "middle_01" + skin, allDescendents=True)
+		L_middleJoints.append(Lside + "middle_01" + skin)
+		L_middleJoints.reverse()
 
-		ringJoints = cmds.listRelatives("*ring_01*", allDescendents=True)
-		ringJoints.append("BIND_L_ring_01_Jnt")
-		ringJoints.reverse()
+		L_ringJoints = cmds.listRelatives(Lside + "ring_01" + skin, allDescendents=True)
+		L_ringJoints.append(Lside + "ring_01" + skin)
+		L_ringJoints.reverse()
 
-		pinkyJoints = cmds.listRelatives("*pinky_01*", allDescendents=True)
-		pinkyJoints.append("BIND_L_pinky_01_Jnt")
-		pinkyJoints.reverse()
-
+		L_pinkyJoints = cmds.listRelatives(Lside + "pinky_01" + skin, allDescendents=True)
+		L_pinkyJoints.append(Lside + "pinky_01" + skin)
+		L_pinkyJoints.reverse()
 
 
 		cmds.select(cl=True)
@@ -104,30 +121,135 @@ class Arm_Rig:
 
 
 
+
+
+
+		"""
+		
+		------------------------------------------------
+		This mirrors the joints across to the right side
+		------------------------------------------------
+		
+		"""
+
+		# mirrors joints across
+		R_BIND_Arm_Joints = cmds.mirrorJoint(L_BIND_Arm_Joints[0], mirrorYZ=True, mirrorBehavior=True, searchReplace=("L_", "R_") )
+		R_Hand_Joints = R_BIND_Arm_Joints[4:]
+		R_BIND_Arm_Joints = R_BIND_Arm_Joints[:4]	
+	
+		R_FK_Arm_Joints = cmds.mirrorJoint(L_FK_Arm_Joints[0], mirrorYZ=True, mirrorBehavior=True, searchReplace=("L_", "R_") )
+		R_IK_Arm_Joints = cmds.mirrorJoint(L_IK_Arm_Joints[0], mirrorYZ=True, mirrorBehavior=True, searchReplace=("L_", "R_") )
+
+
+
+
+
+
+
+		"""
+		
+		-----------------------------------------
+		This creates the arm rig on the left side
+		-----------------------------------------
+		
+		"""
+
 		# creates the IK handle
-		IK_handle = Rig_Utils.createIK(part, IK_Arm_Joints[0], IK_Arm_Joints[2])
+		L_IK_handle = Rig_Utils.createIK(Lside, part, L_IK_Arm_Joints[0], L_IK_Arm_Joints[2])
 
 		# constrains the FK and IK joints to the Bind joints
-		bindConstraints = Rig_Utils.constrainFKIK(BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints)	
+		L_bindConstraints = Rig_Utils.constrainFKIK(L_BIND_Arm_Joints[1:], L_FK_Arm_Joints, L_IK_Arm_Joints)	
 
 		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
-		FK_Controls = Rig_Utils.createFKControls(part, FK_Arm_Joints)
+		FK_Controls = Rig_Utils.createFKControls(part, L_FK_Arm_Joints)
 		
 		# create FK finger controls
-		fingersList = thumbJoints[0:3] + indexJoints[0:3] + middleJoints[0:3] + ringJoints[0:3] + pinkyJoints[0:3]
-		FingerControls = Rig_Utils.HandSetUp(path, fingersList, Hand_Joints)
+		L_fingersList = L_thumbJoints[0:3] + L_indexJoints[0:3] + L_middleJoints[0:3] + L_ringJoints[0:3] + L_pinkyJoints[0:3]
+		L_FingerControls = Rig_Utils.HandSetUp(path, L_fingersList, L_Hand_Joints)
 
-
-
-		IK_Controls = Rig_Utils.createIKControls(part, path, IK_handle, PVpath, PVtranslate)
+		# create IK controls
+		IK_Controls = Rig_Utils.createIKControls(Lside, part, path, L_IK_handle, PVpath, PVtranslate)
 
 		# create stretchy IK
-		Stretchy = Rig_Utils.createStretchy(part, IK_Arm_Joints[0], IK_handle, IK_Arm_Joints[1], IK_Arm_Joints[2], IK_Controls)
+		Stretchy = Rig_Utils.createStretchy(Lside, part, L_IK_Arm_Joints[0], L_IK_handle, L_IK_Arm_Joints[1], L_IK_Arm_Joints[2], IK_Controls)
 
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
-		FKIKSwitch = Rig_Utils.FKIKSwitch(part, SwitchPath, BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
+		FKIKSwitch = Rig_Utils.FKIKSwitch(Lside, part, SwitchPath, L_BIND_Arm_Joints, L_FK_Arm_Joints, L_IK_Arm_Joints, L_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
 
-		Rig_Utils.CleanUp(FK_Controls, IK_Controls, BIND_Arm_Joints, FK_Arm_Joints, IK_Arm_Joints, part, FKIKSwitch, Stretchy)
+		# clean up - tidies up the hierarchy, lock and hide unnecessary channels
+		Rig_Utils.CleanUp(FK_Controls, IK_Controls, L_BIND_Arm_Joints, L_FK_Arm_Joints, L_IK_Arm_Joints, Lside, part, FKIKSwitch, Stretchy)
+
+		cmds.select(cl=True)
+
+
+
+
+		"""
+		
+		-----------------------------------------
+		This creates the arm rig on the right side
+		-----------------------------------------
+		
+		"""
+		
+		
+		R_thumbJoints = cmds.listRelatives(Rside + "thumb_01" + skin, allDescendents=True)
+		R_thumbJoints.append(Rside + "thumb_01" + skin)
+		R_thumbJoints.reverse()
+
+		R_indexJoints = cmds.listRelatives(Rside + "index_01" + skin, allDescendents=True)
+		R_indexJoints.append(Rside + "index_01" + skin)
+		R_indexJoints.reverse()
+
+		R_middleJoints = cmds.listRelatives(Rside + "middle_01" + skin, allDescendents=True)
+		R_middleJoints.append(Rside + "middle_01" + skin)
+		R_middleJoints.reverse()
+
+		R_ringJoints = cmds.listRelatives(Rside + "ring_01" + skin, allDescendents=True)
+		R_ringJoints.append(Rside + "ring_01" + skin)
+		R_ringJoints.reverse()
+
+		R_pinkyJoints = cmds.listRelatives(Rside + "pinky_01" + skin, allDescendents=True)
+		R_pinkyJoints.append(Rside + "pinky_01" + skin)
+		R_pinkyJoints.reverse()
+
+
+		cmds.select(cl=True)
+		
+
+		
+		
+		# creates the IK handle
+		R_IK_handle = Rig_Utils.createIK(Rside, part, R_IK_Arm_Joints[0], R_IK_Arm_Joints[2])
+
+		# constrains the FK and IK joints to the Bind joints
+		R_bindConstraints = Rig_Utils.constrainFKIK(R_BIND_Arm_Joints[1:], R_FK_Arm_Joints, R_IK_Arm_Joints)	
+
+		# create FK and IK controls
+		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
+		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
+		FK_Controls = Rig_Utils.createFKControls(part, R_FK_Arm_Joints)
+
+		
+		# create FK finger controls
+		R_fingersList = R_thumbJoints[0:3] + R_indexJoints[0:3] + R_middleJoints[0:3] + R_ringJoints[0:3] + R_pinkyJoints[0:3]
+		R_FingerControls = Rig_Utils.HandSetUp(path, R_fingersList, R_Hand_Joints)
+
+		
+		
+		IK_Controls = Rig_Utils.createIKControls(Rside, part, path, R_IK_handle, PVpath, PVtranslate)
+
+		# create stretchy IK
+		Stretchy = Rig_Utils.createStretchy(Rside, part, R_IK_Arm_Joints[0], R_IK_handle, R_IK_Arm_Joints[1], R_IK_Arm_Joints[2], IK_Controls)
+
+		# create the FK IK switch
+		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
+		FKIKSwitch = Rig_Utils.FKIKSwitch(Rside, part, SwitchPath, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, R_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
+
+		Rig_Utils.CleanUp(FK_Controls, IK_Controls, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, Rside, part, FKIKSwitch, Stretchy)
+		
+
+

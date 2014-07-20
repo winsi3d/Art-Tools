@@ -47,20 +47,27 @@ class Spine_Rig:
 			locatorInfo.reverse()
 			locatorInfo.pop()
 
-			self.Spine_Rig(locatorInfo, rootLoc)
+
+			spineLocatorInfo = locatorInfo[0:5]
+
+
+			self.Spine_Rig(locatorInfo, spineLocatorInfo, locatorInfo, rootLoc)
+
+
+
 
 		else:
 			return cmds.headsUpMessage("Please Select A Root")
 
 
 
-	def Spine_Rig(self, locatorInfo, rootLoc):
+	def Spine_Rig(self, locatorInfo, spineLocatorInfo, LocatorInfo, rootLoc):
 		part = "Spine"
 		print "in love"
 	
 		# creates the Bind, FK, and IK joints
 		BIND_Spine_Joints = Joint_Utils.BuildJoints("BIND_", locatorInfo)
-		FK_Spine_Joints = Joint_Utils.BuildJoints("FK_", locatorInfo)
+		FK_Spine_Joints = Joint_Utils.BuildJoints("FK_", spineLocatorInfo)
 
 		cmds.delete(rootLoc)
 
@@ -72,6 +79,8 @@ class Spine_Rig:
 
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 
-		Rig_Utils.SpineSetUp(BIND_Spine_Joints, path, FK_Spine_Joints)
+		Rig_Utils.SpineSetUp(BIND_Spine_Joints[0:5], path, FK_Spine_Joints)
 
 		FK_Controls = Rig_Utils.createFKControls(part, FK_Spine_Joints)
+
+		Rig_Utils.CleanUp(FK_Controls, IK_Controls, BIND_Arm_Joints, FK_Spine_Joints, IK_Spine_Joints, part, FKIKSwitch, Stretchy)

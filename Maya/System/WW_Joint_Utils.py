@@ -6,12 +6,12 @@ Description: Builds Joints
 
 import maya.cmds as cmds
 
-def BuildJoints(prefix, locatorInfo):
+def BuildJoints(side, kineType, locatorInfo, jntType):
 	cmds.select(d=True)
 	jointInfo = []
 
 	for each in locatorInfo:
-		jntName = prefix + each[0] + "_Jnt"
+		jntName = side + kineType + each[0] + jntType
 		jnt = cmds.joint(n=jntName, p=each[1])
 		jointInfo.append(jnt)
 

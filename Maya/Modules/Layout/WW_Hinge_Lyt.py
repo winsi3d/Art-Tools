@@ -49,7 +49,7 @@ class Hinge_Lyt:
 		spine_loc_list = []
 
 		
-		arm_root_loc = cmds.spaceLocator(n="L+" + ArmLocNames[0])
+		arm_root_loc = cmds.spaceLocator(n=ArmLocNames[0])
 		cmds.xform(cp=True)
 		cmds.xform(t=ArmLocPos[0])
 
@@ -59,7 +59,7 @@ class Hinge_Lyt:
 		x = 1
 
 		for each in ArmLocNames[1:]:
-			arm_loc_list.append(cmds.joint(n="L_"+each, a=True, p=ArmLocPos[x]))
+			arm_loc_list.append(cmds.joint(n=each, a=True, p=ArmLocPos[x]))
 			x += 1
 
 		for each in arm_loc_list:
@@ -68,7 +68,7 @@ class Hinge_Lyt:
 
 		z = 0
 		for each in HandLocNames:
-			hand_loc_list.append(cmds.joint(n="L_"+each, a=True, p=HandLocPos[z]))
+			hand_loc_list.append(cmds.joint(n=each, a=True, p=HandLocPos[z]))
 			if (each == "hand") or (each == "thumb_04") or (each == "index_04") or (each == "middle_04") or (each == "ring_04") or (each == "pinky_04"):
 				cmds.select(cl=True)
 			z += 1

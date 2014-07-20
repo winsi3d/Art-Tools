@@ -11,10 +11,10 @@ import Maya.System.WW_Joint_Utils as Joint_Utils
 reload(Joint_Utils)
 
 
-def createIK(part, IKstartJoint, IKendJoint):
+def createIK(side, part, IKstartJoint, IKendJoint):
 	print "In Create IK"
 
-	IKName = part + "_ikHandle"
+	IKName = side + part + "_ikHandle"
 	IK_handle = cmds.ikHandle(n=IKName, sj=IKstartJoint, ee=IKendJoint, sol="ikRPsolver")
 	cmds.select(cl=True)
 
@@ -52,7 +52,7 @@ def createFKControls(part, FK_Joints):
 	for eachJoint in FK_Joints:
 
 		# set the name here
-		FKname = str(FK_Joints[x])[3:len(FK_Joints[x])-4]
+		FKname = str(FK_Joints[x])[:len(FK_Joints[x])-6]
 
 		# create the controller
 		circleCtl.append(cmds.circle(sections=8, ch=False, n=FKname + "_CTRL"))
@@ -102,7 +102,7 @@ def createFKControls(part, FK_Joints):
 
 
 
-def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
+def createIKControls(side, part, path, IK_handle, PVpath, PVtranslate):
 	print "In Create IK Controls"
 
 	Ctl = []
@@ -122,11 +122,11 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	# import the cube control, rename, and add it to Ctl list
 	cmds.file(path, i=True)
 	cmds.select("curve1", r=True)
-	cmds.rename(part + "_IK_CTRL")
+	cmds.rename(side + part + "_IK_CTRL")
 	Ctl.append(cmds.ls(sl=True))
 
 	# duplicate the curve to create the gimbal control, and rename
-	Ctl.append(cmds.duplicate(n=part + "_IK_gimbal_CTRL", ))
+	Ctl.append(cmds.duplicate(n=part + side + "_IK_gimbal_CTRL", ))
 	cmds.scale(0.8, 0.8, 0.8)
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
@@ -137,7 +137,7 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	cmds.select(Ctl[0], r=True)
 	
 	# groups the curve to itself
-	CtlGrp.append(cmds.group(n=part + "_IK_CTRL_Grp"))
+	CtlGrp.append(cmds.group(n=side + part + "_IK_CTRL_Grp"))
 	
 
 	# parent constrain the group to the joint to place get the translations and rotations from the joint, and deletes the constraint
@@ -193,14 +193,14 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 	# import pole vector control and rename
 	cmds.file(PVpath, i=True)
 	cmds.select("PVcurve", r=True)
-	cmds.rename(part + "_PV")
+	cmds.rename(side + part + "_PV")
 
 	# rotate the joint 90 degrees in x and scale down
 	cmds.xform(r=True, ro=(-90, 0, 0), s=(0.2, 0.2, 0.2))
 
 	# group it to itself
 	PV.append(cmds.ls(sl=True))
-	PVGrp.append(cmds.group(n=part + "_PV_Grp"))
+	PVGrp.append(cmds.group(n=side + part + "_PV_Grp"))
 
 	# point constrain to snap it to the elbow, and delete the constraint
 	pv_pctemp = cmds.pointConstraint(PVJoint[0], PVGrp[0], mo=False)
@@ -218,7 +218,7 @@ def createIKControls(part, path, IK_handle, PVpath, PVtranslate):
 
 
 
-def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
+def createStretchy(side, part, start, end, stretchybone1, stretchybone2, IK_Controls):
 	print "In Create Stretchy IK"
 
 	# find the positions of the start and end points
@@ -227,10 +227,10 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
 
 
 	# create locators at these positions and point constrain them to the start joint and end IK handle control
-	startLoc = cmds.spaceLocator(n=part + "_DistDim_Start_LOC")[0]
+	startLoc = cmds.spaceLocator(n=side + part + "_DistDim_Start_LOC")[0]
 	cmds.pointConstraint(start, startLoc, mo=False)
 
-   	endLoc = cmds.spaceLocator(n=part + "_DistDim_End_LOC")[0]
+   	endLoc = cmds.spaceLocator(n=side + part + "_DistDim_End_LOC")[0]
    	cmds.pointConstraint(end[0], endLoc, mo=False)
 
 
@@ -244,7 +244,7 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
    	
 
 	# create a multiply divide node
-	multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name=part + "_stretchyMultDiv")
+	multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name=side + part + "_stretchyMultDiv")
 	cmds.setAttr(str(multdiv) + ".operation", 2)
 
 
@@ -260,7 +260,7 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
 	cmds.setAttr(str(multdiv) + ".input2X", restLength)
 	
 	# create a condition node
-	stretchyCnd = cmds.shadingNode('condition', asUtility=True, name=part + "_stretchyCnd")
+	stretchyCnd = cmds.shadingNode('condition', asUtility=True, name=side + part + "_stretchyCnd")
 	cmds.setAttr(str(stretchyCnd) + ".operation", 3)
 
 
@@ -279,12 +279,12 @@ def createStretchy(part, start, end, stretchybone1, stretchybone2, IK_Controls):
 
 
 
-def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate):
+def FKIKSwitch(side, part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Controls, IK_Controls, SwitchTranslate):
 	print "In FK IK Switch"
 
 	# create an IK / FK switch
 	switchCtl = []
-	switchName = part + "FkIk_switch"
+	switchName = side + part + "FkIk_switch"
 
 	# import the switch control and rename
 	cmds.file(SwitchPath, i=True)
@@ -316,7 +316,7 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 		constr_FK = str(each)[3:len(each)-3] + "." + FKs[x] + "W0"
 
 		cmds.connectAttr(switchName + ".switch", constr_IK)
-		reverseN = cmds.createNode("reverse", n=str(BIND_list[x]) + "_reverseNode")
+		reverseN = cmds.createNode("reverse", n=side + str(BIND_list[x]) + "_reverseNode")
 		cmds.connectAttr(switchName + ".switch", reverseN + ".inputX")
 		cmds.connectAttr(reverseN+ ".outputX", constr_FK)
 
@@ -329,9 +329,9 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 	cmds.connectAttr(switchName + ".switch", str(IK_Controls[0][0][0]) + ".visibility")
 	cmds.connectAttr(switchName + ".switch", str(IK_Controls[1][0][0]) + ".visibility")
 
-	VizReverse = cmds.createNode("reverse", n = part + "_FK_visibility_reverseNode")
-	cmds.connectAttr(switchName + ".switch", str(part) + "_FK_visibility_reverseNode.inputX")
-	cmds.connectAttr(str(part) + "_FK_visibility_reverseNode.outputX", str(FK_Controls[0])[3:len(FK_Controls[0])-3] + ".visibility")
+	VizReverse = cmds.createNode("reverse", n = side + part + "_FK_visibility_reverseNode")
+	cmds.connectAttr(switchName + ".switch", str(side) + str(part) + "_FK_visibility_reverseNode.inputX")
+	cmds.connectAttr(str(side) + str(part) + "_FK_visibility_reverseNode.outputX", str(FK_Controls[0])[3:len(FK_Controls[0])-3] + ".visibility")
 
 
 	# locks and hides translate channels for the switch
@@ -361,7 +361,7 @@ def FKIKSwitch(part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_Contro
 	return switchCtl
 
 
-def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, FKIKSwitch, Stretchy):
+def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, side, part, FKIKSwitch, Stretchy):
 	print "In Rig Clean Up"
 
 	for each in FK_Controls:
@@ -405,28 +405,28 @@ def CleanUp(FK_Controls, IK_Controls, BIND_Joints, FK_Joints, IK_Joints, part, F
 
 
 	# create a null group and parent the Bind, FK and IK joint chains to this group
-	skelName = part + "_Skeleton_Grp"
+	skelName = side + part + "_Skeleton_Grp"
 	skel = cmds.group(em=True, name=skelName)
 	cmds.parent(BIND_Joints[0], skelName)
 	cmds.parent(FK_Joints[0], skelName)
 	cmds.parent(IK_Joints[0], skelName)
 
 	# create a null group and parent the controls to this group
-	rigName = part + "_Rig_Grp"
+	rigName = side + part + "_Rig_Grp"
 	rig = cmds.group(em=True, name=rigName)
 	cmds.parent(cmds.listRelatives(FK_Controls[0], parent=True), rigName)
 	cmds.parent(cmds.listRelatives(IK_Controls[0][0], parent=True), rigName)
 	cmds.parent(cmds.listRelatives(IK_Controls[1][0], parent=True), rigName)
 	cmds.parent(FKIKSwitch[0], rigName)
 
-	extrasName = part + "_Extras"
+	extrasName = side + part + "_Extras"
 	extras = cmds.group(em=True, name=extrasName)
 	cmds.parent(Stretchy[0], extrasName)
 	cmds.parent(Stretchy[1], extrasName)
 	cmds.parent(Stretchy[2], extrasName)
 	cmds.setAttr(str(extras) + ".visibility", 0)
 
-	mainGrpName = part + "_Grp"
+	mainGrpName = side + part + "_Grp"
 	cmds.group(em=True, name=mainGrpName)
 	cmds.parent(skel, mainGrpName)
 	cmds.parent(rig, mainGrpName)
@@ -597,7 +597,8 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 	for eachJoint in fingerControls:
 
 		# set the name here
-		FKname = str(fingerControls[x])[5:len(fingerControls[x])-4]
+		FKname = str(fingerControls[x])[:len(fingerControls[x])-6]
+		print FKname
 
 		# create the controller
 		fingerCtrl.append(cmds.circle(sections=8, ch=False, n=FKname + "_CTRL"))
@@ -634,11 +635,17 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 		if y == len(fingerCtrlGrp)-1:
 			break
 
-
 	cmds.select(cl=True)
 
-	fingerGrpName = fingerCtrlGrp[0].partition("_")[0] + "_Fingers_zero_rg"
 	
+	
+	fingerGrpName = fingerCtrlGrp[0].partition("_")[0] + "_Fingers_zero_rg"
+	print fingerCtrlGrp
+
+	fingerGrp = cmds.group(n=fingerGrpName, empty=True)
+	pc = cmds.parentConstraint(Hand_Joints[0], fingerGrp)
+	cmds.delete(pc)
+
 
 	cmds.select(fingerCtrlGrp[0], r=True)
 	cmds.select(fingerCtrlGrp[3], add=True)
@@ -646,10 +653,14 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 	cmds.select(fingerCtrlGrp[9], add=True)
 	cmds.select(fingerCtrlGrp[12], add=True)
 
-	fingerGrp = cmds.group(n=fingerGrpName)
+	TopGrp = cmds.ls(sl=True)
+	print TopGrp
+
+	for each in TopGrp:
+		cmds.parent(each, fingerGrp)
 
 
-	cmds.parentConstraint(Hand_Joints, fingerGrp)
+	cmds.parentConstraint(Hand_Joints[0], fingerGrp)
 
 
 def SpineSetUp(BIND_Spine_Joints, path, FK_Spine_Joints):
@@ -864,15 +875,19 @@ def SpineSetUp(BIND_Spine_Joints, path, FK_Spine_Joints):
 	x = 0
 	bindConstraints = []
 	for eachJoint in BIND_Spine_Joints:
+		print eachJoint
 		bindConstraints.append(cmds.parentConstraint(FK_Spine_Joints[x], IK_Spine_Joints[x], BIND_Spine_Joints[x], mo=True))
 		x += 1
 
 	# hides the FK and IK arm joints
 	cmds.setAttr(str(FK_Spine_Joints[0]) + ".visibility", False)
 	
+
+
 	for each in IK_Spine_Joints:
 		cmds.setAttr(str(each[0]) + ".visibility", False)
 
+	
 
 
 
