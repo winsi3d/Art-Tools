@@ -45,7 +45,7 @@ class Arm_Rig:
 				locatorInfo.append([each, pos])
 
 			clavArmLocatorInfo = locatorInfo[0:4]
-			armLocatorInfo = locatorInfo[1:4]
+			armLocatorInfo = locatorInfo[1:5]
 
 			handLocatorInfo = locatorInfo[4:]
 
@@ -155,7 +155,9 @@ class Arm_Rig:
 		"""
 
 		# creates the IK handle
-		L_IK_handle = Rig_Utils.createIK(Lside, part, L_IK_Arm_Joints[0], L_IK_Arm_Joints[2])
+		L_IK_handle = []
+		L_IK_handle.append(Rig_Utils.createIK(Lside, part, L_IK_Arm_Joints[0], L_IK_Arm_Joints[2]))
+		L_IK_handle.append(Rig_Utils.createIK(Lside, part, L_IK_Arm_Joints[2], L_IK_Arm_Joints[3]))
 
 		# constrains the FK and IK joints to the Bind joints
 		L_bindConstraints = Rig_Utils.constrainFKIK(L_BIND_Arm_Joints[1:], L_FK_Arm_Joints, L_IK_Arm_Joints)	
@@ -163,22 +165,23 @@ class Arm_Rig:
 		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
-		FK_Controls = Rig_Utils.createFKControls(part, L_FK_Arm_Joints)
+		FK_Controls = Rig_Utils.createFKControls(part, L_FK_Arm_Joints[0:3])
 		
-		# create FK finger controls
-		L_fingersList = L_thumbJoints[0:3] + L_indexJoints[0:3] + L_middleJoints[0:3] + L_ringJoints[0:3] + L_pinkyJoints[0:3]
-		L_FingerControls = Rig_Utils.HandSetUp(path, L_fingersList, L_Hand_Joints)
-
 		# create IK controls
 		IK_Controls = Rig_Utils.createIKControls(Lside, part, path, L_IK_handle, PVpath, PVtranslate)
 
 		# create stretchy IK
-		Stretchy = Rig_Utils.createStretchy(Lside, part, L_IK_Arm_Joints[0], L_IK_handle, L_IK_Arm_Joints[1], L_IK_Arm_Joints[2], IK_Controls)
+		Stretchy = Rig_Utils.createStretchy(Lside, part, L_IK_Arm_Joints[0], L_IK_handle[0], L_IK_Arm_Joints[1], L_IK_Arm_Joints[2], IK_Controls)
 
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
 		FKIKSwitch = Rig_Utils.FKIKSwitch(Lside, part, SwitchPath, L_BIND_Arm_Joints, L_FK_Arm_Joints, L_IK_Arm_Joints, L_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
 
+		# create FK finger controls
+		L_fingersList = L_thumbJoints[0:3] + L_indexJoints[0:3] + L_middleJoints[0:3] + L_ringJoints[0:3] + L_pinkyJoints[0:3]
+		L_FingerControls = Rig_Utils.HandSetUp(path, L_fingersList, L_Hand_Joints, FKIKSwitch)
+
+		
 		# clean up - tidies up the hierarchy, lock and hide unnecessary channels
 		Rig_Utils.CleanUp(FK_Controls, IK_Controls, L_BIND_Arm_Joints, L_FK_Arm_Joints, L_IK_Arm_Joints, Lside, part, FKIKSwitch, Stretchy)
 
@@ -223,7 +226,11 @@ class Arm_Rig:
 		
 		
 		# creates the IK handle
-		R_IK_handle = Rig_Utils.createIK(Rside, part, R_IK_Arm_Joints[0], R_IK_Arm_Joints[2])
+		R_IK_handle = []
+		R_IK_handle.append(Rig_Utils.createIK(Rside, part, R_IK_Arm_Joints[0], R_IK_Arm_Joints[2]))
+		R_IK_handle.append(Rig_Utils.createIK(Rside, part, R_IK_Arm_Joints[2], R_IK_Arm_Joints[3]))
+
+		
 
 		# constrains the FK and IK joints to the Bind joints
 		R_bindConstraints = Rig_Utils.constrainFKIK(R_BIND_Arm_Joints[1:], R_FK_Arm_Joints, R_IK_Arm_Joints)	
@@ -231,24 +238,21 @@ class Arm_Rig:
 		# create FK and IK controls
 		path = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/CubeCTL.ma"
 		PVpath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/PoleVectorCTL.ma"
-		FK_Controls = Rig_Utils.createFKControls(part, R_FK_Arm_Joints)
+		FK_Controls = Rig_Utils.createFKControls(part, R_FK_Arm_Joints[0:3])
 
-		
-		# create FK finger controls
-		R_fingersList = R_thumbJoints[0:3] + R_indexJoints[0:3] + R_middleJoints[0:3] + R_ringJoints[0:3] + R_pinkyJoints[0:3]
-		R_FingerControls = Rig_Utils.HandSetUp(path, R_fingersList, R_Hand_Joints)
-
-		
 		
 		IK_Controls = Rig_Utils.createIKControls(Rside, part, path, R_IK_handle, PVpath, PVtranslate)
 
 		# create stretchy IK
-		Stretchy = Rig_Utils.createStretchy(Rside, part, R_IK_Arm_Joints[0], R_IK_handle, R_IK_Arm_Joints[1], R_IK_Arm_Joints[2], IK_Controls)
+		Stretchy = Rig_Utils.createStretchy(Rside, part, R_IK_Arm_Joints[0], R_IK_handle[0], R_IK_Arm_Joints[1], R_IK_Arm_Joints[2], IK_Controls)
 
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
-		FKIKSwitch = Rig_Utils.FKIKSwitch(Lside, part, SwitchPath, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, R_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
+		FKIKSwitch = Rig_Utils.FKIKSwitch(Rside, part, SwitchPath, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, R_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
+
+		# create FK finger controls
+		R_fingersList = R_thumbJoints[0:3] + R_indexJoints[0:3] + R_middleJoints[0:3] + R_ringJoints[0:3] + R_pinkyJoints[0:3]
+		R_FingerControls = Rig_Utils.HandSetUp(path, R_fingersList, R_Hand_Joints, FKIKSwitch)
+
 
 		Rig_Utils.CleanUp(FK_Controls, IK_Controls, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, Rside, part, FKIKSwitch, Stretchy)
-
-

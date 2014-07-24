@@ -109,7 +109,7 @@ def createIKControls(side, part, path, IK_handle, PVpath, PVtranslate):
 	CtlGrp = []
 
 	# Find the IK effector joint
-	IKEffectorJnt = cmds.listConnections(IK_handle[1])
+	IKEffectorJnt = cmds.listConnections(IK_handle[0][1])
 
 	# Find the PV joint from the effector joint
 	PVJoint = cmds.listRelatives(IKEffectorJnt[1], parent=True)
@@ -126,7 +126,7 @@ def createIKControls(side, part, path, IK_handle, PVpath, PVtranslate):
 	Ctl.append(cmds.ls(sl=True))
 
 	# duplicate the curve to create the gimbal control, and rename
-	Ctl.append(cmds.duplicate(n=part + side + "_IK_gimbal_CTRL", ))
+	Ctl.append(cmds.duplicate(n=side + part + "_IK_gimbal_CTRL", ))
 	cmds.scale(0.8, 0.8, 0.8)
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
@@ -182,8 +182,8 @@ def createIKControls(side, part, path, IK_handle, PVpath, PVtranslate):
 		
 		
 	# parent the IK handle to the controller
-	cmds.parent(IK_handle[0], Ctl[1])
-
+	cmds.parent(IK_handle[0][0], Ctl[1])
+	cmds.parent(IK_handle[1][0], Ctl[1])
 
 
 	"""
@@ -216,7 +216,8 @@ def createIKControls(side, part, path, IK_handle, PVpath, PVtranslate):
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
 	# creates the pole vector constraint
-	cmds.poleVectorConstraint(PV[0], IK_handle[0])
+	cmds.poleVectorConstraint(PV[0], IK_handle[0][0])
+	
 
 	return Ctl, PV
 
@@ -307,7 +308,7 @@ def FKIKSwitch(side, part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_
 	cmds.makeIdentity(apply=True, t=True, r=True, s=True, n=False)
 
 	# parent constrains the switch control
-	cmds.parentConstraint(BIND_list[2], switchCtl[0], mo=True)
+	cmds.parentConstraint(BIND_list[3], switchCtl[0], mo=True)
 
 	# add a switch attribute
 	cmds.addAttr(ln="switch", at="enum", en="FK:IK", k=True)
@@ -587,7 +588,7 @@ def FootSetUp(IK_Leg_Joints, IK_handle, IK_Controls):
 	cmds.connectAttr(str(footrockinnermultdiv) + ".outputX", str(FootRockInnerGrp) + ".rz")
 
 
-def HandSetUp(path, fingerControls, Hand_Joints):
+def HandSetUp(path, fingerControls, Hand_Joints, FKIKSwitch):
 	print "In Hand Set Up"
 
 	# create circle controllers for the FK chain
@@ -602,7 +603,6 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 
 		# set the name here
 		FKname = str(fingerControls[x])[:len(fingerControls[x])-6]
-		print FKname
 
 		# create the controller
 		fingerCtrl.append(cmds.circle(sections=8, ch=False, n=FKname + "_CTRL"))
@@ -644,7 +644,7 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 	
 	
 	fingerGrpName = fingerCtrlGrp[0].partition("_")[0] + "_Fingers_zero_rg"
-	print fingerCtrlGrp
+
 
 	fingerGrp = cmds.group(n=fingerGrpName, empty=True)
 	pc = cmds.parentConstraint(Hand_Joints[0], fingerGrp)
@@ -664,6 +664,94 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 
 
 	cmds.parentConstraint(Hand_Joints[0], fingerGrp)
+
+	print fingerCtrlSDKGrp
+
+	# Add attributes for fingers
+	cmds.addAttr(FKIKSwitch[0], longName="thumb", shortName="Thumb", attributeType="enum", enumName="---", k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="thumb_01", shortName="Thumb_01", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="thumb_02", shortName="Thumb_02", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="thumb_03", shortName="Thumb_03", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.setAttr(str(FKIKSwitch[0][0]) + ".thumb", lock=True)
+
+	cmds.addAttr(FKIKSwitch[0], longName="index", shortName="Index", attributeType="enum", enumName="---", k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="index_01", shortName="Index_01", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="index_02", shortName="Index_02", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="index_03", shortName="Index_03", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.setAttr(str(FKIKSwitch[0][0]) + ".index", lock=True)
+
+	cmds.addAttr(FKIKSwitch[0], longName="middle", shortName="Middle", attributeType="enum", enumName="---", k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="middle_01", shortName="Middle_01", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="middle_02", shortName="Middle_02", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="middle_03", shortName="Middle_03", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.setAttr(str(FKIKSwitch[0][0]) + ".middle", lock=True)
+
+	cmds.addAttr(FKIKSwitch[0], longName="ring", shortName="Ring", attributeType="enum", enumName="---", k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="ring_01", shortName="Ring_01", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="ring_02", shortName="Ring_02", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="ring_03", shortName="Ring_03", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.setAttr(str(FKIKSwitch[0][0]) + ".ring", lock=True)
+
+	cmds.addAttr(FKIKSwitch[0], longName="pinky", shortName="Pinky", attributeType="enum", enumName="---", k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="pinky_01", shortName="Pinky_01", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="pinky_02", shortName="Pinky_02", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="pinky_03", shortName="Pinky_03", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.setAttr(str(FKIKSwitch[0][0]) + ".pinky", lock=True)
+
+	cmds.addAttr(FKIKSwitch[0], longName="spread", shortName="Spread", attributeType="enum", enumName="---", k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="thumbSpread", shortName="ThumbSpread", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="indexSpread", shortName="IndexSpread", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="middleSpread", shortName="MiddleSpread", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="ringSpread", shortName="RingSpread", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.addAttr(FKIKSwitch[0], longName="pinkySpread", shortName="PinkySpread", attributeType="float", min=-10, max=10, dv=0, k=True)
+	cmds.setAttr(str(FKIKSwitch[0][0]) + ".spread", lock=True)
+
+
+	# Connect finger curl and spread
+	x = 0
+	for each in fingerCtrlSDKGrp:
+		finger = each.partition("_CTRL")[0]
+		fingerAttr = finger.partition("_")[2]
+		
+		multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name=finger + "_MultDiv")
+		cmds.connectAttr(FKIKSwitch[0][0] + "." + fingerAttr, str(multdiv) + ".input1Z")
+		cmds.setAttr(str(multdiv) + ".input2Z", -10)
+		cmds.connectAttr(str(multdiv) + ".outputZ", fingerCtrlSDKGrp[x] + ".rz")
+
+		if fingerAttr == "thumb_01":
+			multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="thumbSpread_MultDiv")
+			cmds.connectAttr(FKIKSwitch[0][0] + ".thumbSpread", str(multdiv) + ".input1Y")
+			cmds.setAttr(str(multdiv) + ".input2Y", -8)
+			cmds.connectAttr(str(multdiv) + ".outputY", fingerCtrlSDKGrp[x] + ".ry")
+
+		if fingerAttr == "index_01":
+			multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="indexSpread_MultDiv")
+			cmds.connectAttr(FKIKSwitch[0][0] + ".indexSpread", str(multdiv) + ".input1Y")
+			cmds.setAttr(str(multdiv) + ".input2Y", -6)
+			cmds.connectAttr(str(multdiv) + ".outputY", fingerCtrlSDKGrp[x] + ".ry")
+
+		if fingerAttr == "middle_01":
+			multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="middleSpread_MultDiv")
+			cmds.connectAttr(FKIKSwitch[0][0] + ".indexSpread", str(multdiv) + ".input1Y")
+			cmds.setAttr(str(multdiv) + ".input2Y", 2)
+			cmds.connectAttr(str(multdiv) + ".outputY", fingerCtrlSDKGrp[x] + ".ry")
+
+		if fingerAttr == "ring_01":
+			multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="ringSpread_MultDiv")
+			cmds.connectAttr(FKIKSwitch[0][0] + ".ringSpread", str(multdiv) + ".input1Y")
+			cmds.setAttr(str(multdiv) + ".input2Y", 6)
+			cmds.connectAttr(str(multdiv) + ".outputY", fingerCtrlSDKGrp[x] + ".ry")
+
+		if fingerAttr == "pinky_01":
+			multdiv = cmds.shadingNode('multiplyDivide', asUtility=True, name="pinkySpread_MultDiv")
+			cmds.connectAttr(FKIKSwitch[0][0] + ".pinkySpread", str(multdiv) + ".input1Y")
+			cmds.setAttr(str(multdiv) + ".input2Y", 10)
+			cmds.connectAttr(str(multdiv) + ".outputY", fingerCtrlSDKGrp[x] + ".ry")
+
+
+		x += 1
+
+
 
 
 def SpineSetUp(BIND_Spine_Joints, path, FK_Spine_Joints):
