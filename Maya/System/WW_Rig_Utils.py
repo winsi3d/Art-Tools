@@ -138,12 +138,16 @@ def createIKControls(side, part, path, IK_handle, PVpath, PVtranslate):
 	
 	# groups the curve to itself
 	CtlGrp.append(cmds.group(n=side + part + "_IK_CTRL_Grp"))
-	
+
 
 	# parent constrain the group to the joint to place get the translations and rotations from the joint, and deletes the constraint
 	if part.rpartition("_")[2] == "Arm":
 		ik_pctemp = cmds.parentConstraint(IKEffectorJnt[1], CtlGrp, mo=False)
 		cmds.delete(ik_pctemp)
+		print CtlGrp[0]
+		print "sehfsefliehruishelirubfsefbs"
+		if side == "R_":
+			cmds.setAttr( "R_Arm_IK_CTRL_Grp.rotateX", 0 )
 
 	elif part.rpartition("_")[2] == "Leg":
 		ik_pctemp = cmds.pointConstraint(IKEffectorJnt[1], CtlGrp, mo=False)
@@ -257,7 +261,7 @@ def createStretchy(side, part, start, end, stretchybone1, stretchybone2, IK_Cont
 	pos2 = cmds.joint(stretchybone2, q=True, r=True, p=True)
 
 	restLength = pos1[0] + pos2[0]
-	cmds.setAttr(str(multdiv) + ".input2X", restLength)
+	cmds.setAttr(str(multdiv) + ".input2X", abs(restLength))
 	
 	# create a condition node
 	stretchyCnd = cmds.shadingNode('condition', asUtility=True, name=side + part + "_stretchyCnd")
@@ -330,7 +334,7 @@ def FKIKSwitch(side, part, SwitchPath, BIND_list, FKs, IKs, bindConstraints, FK_
 	cmds.connectAttr(switchName + ".switch", str(IK_Controls[1][0][0]) + ".visibility")
 
 	VizReverse = cmds.createNode("reverse", n = side + part + "_FK_visibility_reverseNode")
-	cmds.connectAttr(switchName + ".switch", str(side) + str(part) + "_FK_visibility_reverseNode.inputX")
+	cmds.connectAttr(switchName + ".switch", str(VizReverse) + ".inputX")
 	cmds.connectAttr(str(side) + str(part) + "_FK_visibility_reverseNode.outputX", str(FK_Controls[0])[3:len(FK_Controls[0])-3] + ".visibility")
 
 
@@ -654,7 +658,6 @@ def HandSetUp(path, fingerControls, Hand_Joints):
 	cmds.select(fingerCtrlGrp[12], add=True)
 
 	TopGrp = cmds.ls(sl=True)
-	print TopGrp
 
 	for each in TopGrp:
 		cmds.parent(each, fingerGrp)

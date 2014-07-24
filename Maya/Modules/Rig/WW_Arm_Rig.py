@@ -247,9 +247,8 @@ class Arm_Rig:
 
 		# create the FK IK switch
 		SwitchPath = "/Users/Winsi/Documents/Art Tools/Maya/ControllerCurves/fkik_switch.ma"
-		FKIKSwitch = Rig_Utils.FKIKSwitch(Rside, part, SwitchPath, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, R_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
+		FKIKSwitch = Rig_Utils.FKIKSwitch(Lside, part, SwitchPath, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, R_bindConstraints, FK_Controls, IK_Controls, SwitchTranslate)
 
 		Rig_Utils.CleanUp(FK_Controls, IK_Controls, R_BIND_Arm_Joints, R_FK_Arm_Joints, R_IK_Arm_Joints, Rside, part, FKIKSwitch, Stretchy)
-		
 
 
